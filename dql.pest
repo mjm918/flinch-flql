@@ -3,5 +3,127 @@
 // dql
 // Author: julfikar
 //
+//
+// Created by intellij-pest on 2023-04-27
+// grammar
+// Author: julfikar
+//
 
-dql = { "Hello World!" }
+program = _{ SOI ~ ";"* ~ (stmt ~ ";"+) * ~ stmt? ~ EOI }
+stmt = _{ expr }
+
+expr = {
+    create |
+    open |
+    drop |
+    len |
+    upsert |
+    upsert_where |
+    put |
+    exi |
+    search |
+    get |
+    find |
+    delete |
+    delete_where
+}
+
+create = { "CREATE" ~ name ~ "->" ~ object }
+open = { "OPEN" ~ name }
+drop = { "DROP" ~ name }
+len = { "LEN" ~ name }
+
+upsert = { "UPSERT" ~ array }
+upsert_where = { "UPSERT" ~ object ~ "WHERE" ~ clause }
+
+put = { "PUT" ~ "->" ~ key ~ "->" ~ object }
+exi = { "EXISTS" ~ "->" ~ key }
+search = { "SEARCH" ~ "->" ~ query }
+
+find = { "FIND" ~ "WHERE" ~ clause }
+get = { "GET" ~ "->" ~ key }
+
+delete = { "DELETE"~ "->" ~ key }
+delete_where = { "DELETE" ~ "WHERE" ~ clause }
+
+compare = {
+    "$like" | "$gte" | "$lte" |
+    "$inc" | "$ninc" | "$eq" |
+    "$neq" | "$gt" | "$lt"
+}
+
+key = @{
+	quots
+}
+
+name = @{
+	quots
+}
+
+field = @{
+	quots
+}
+
+query = @{
+    quots
+}
+
+conjunction = {
+    "$and" | "$or"
+}
+
+
+clause = _{
+    object | (conjunction ~ ":" ~ clause_array)*
+}
+
+clause_object = {
+    "{\"" ~ compare ~ "\":" ~ "[" ~ string ~ "," ~ (number | boolean | null) ~ "]}"
+}
+
+clause_array = {
+    "[" ~ clause_object ~ ("," ~ clause_object)* ~ "]"
+}
+
+quots = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
+
+// JSON
+json = _{ (object | array) }
+
+value = _{ object | array | string | number | boolean | null }
+
+object = {
+    "{" ~ "}" |
+    "{" ~ pair ~ ("," ~ pair)* ~ "}"
+}
+pair = { string ~ ":" ~ value }
+
+array = {
+    "[" ~ "]" |
+    "[" ~ value ~ ("," ~ value)* ~ "]"
+}
+
+string = ${ "\"" ~ inner ~ "\"" }
+inner = @{ char* }
+char = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+
+number = @{
+    "-"?
+    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
+    ~ ("." ~ ASCII_DIGIT*)?
+    ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
+}
+
+boolean = { "true" | "false" }
+
+null = { "null" }
+
+// JSON end
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+COMMENT = _{ "#" ~ (!"\n" ~ ANY)* }
