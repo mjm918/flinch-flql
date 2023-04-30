@@ -41,6 +41,7 @@ pub enum Dql {
     Drop(String),
     Len(String),
     Upsert(String,Value,Option<Clause>),
+    UpsertWithoutClause(String,Value),
     Put(String,String,Value),
     Exists(String,String),
     Search(String,String,Option<SortDirection>,Option<OffsetLimit>),
@@ -77,12 +78,11 @@ fn recur(pair: Pair<Rule>) -> Dql {
         }
         Rule::upsert => {
             let kv = kv(pair);
-            Dql::Upsert(
+            Dql::UpsertWithoutClause(
                 kv.0,
                 serde_json::from_str(
                     &kv.1
-                ).unwrap(),
-                None
+                ).unwrap()
             )
         }
         Rule::upsert_where => {
