@@ -2,7 +2,7 @@
 extern crate pest_derive;
 extern crate pest;
 
-mod flinch_dql {
+pub(crate) mod flinch_dql {
     use anyhow::{Result, anyhow, Error};
     use pest::Parser;
     use serde_json::Value;
