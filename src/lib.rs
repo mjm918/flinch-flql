@@ -305,63 +305,6 @@ fn str(opt: Pair<Rule>) -> String {
     opt.as_str().to_string()
 }
 
-//! Example
-//! ```
-//! let ql = r#"
-//!     CREATE collection -> {};
-//!
-//!     DROP collection;
-//!
-//!     LEN collection;
-//!
-//!     UPSERT collection [{"avc":"1123"}];
-//!
-//!     UPSERT collection {"avc":"1123"} WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
-//!
-//!     PUT collection -> id -> {};
-//!
-//!     EXISTS collection -> id;
-//!
-//!     SEARCH collection -> 'your random query' OFFSET 0 LIMIT 1000000;
-//!
-//!     GET collection WHERE {} SORT id DESC OFFSET 0 LIMIT 1000000;
-//!
-//!     GET collection WHERE $or:[{"$eq":{"a.b":3}},{"$lt":{"b":3}}] OFFSET 0 LIMIT 1000000;
-//!
-//!     GET collection -> id;
-//!
-//!     DELETE collection -> id;
-//!
-//!     DELETE collection WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
-//! "#;
-//!
-//! let parsed = parse(ql);
-//! assert!(parsed.is_ok());
-//!
-//! let parsed = parsed.unwrap();
-//! assert!(!parsed.is_empty());
-//!
-//! for ql in parsed {
-//!     match ql {
-//!         Dql::Create(name, option) => {}
-//!         Dql::Open(name) => {}
-//!         Dql::Drop(name) => {}
-//!         Dql::Len(name) => {}
-//!         Dql::Upsert(name, doc, clause) => {}
-//!         Dql::Put(name, index, doc) => {}
-//!         Dql::Exists(name, index) => {}
-//!         Dql::Search(name, query, sort, limit) => {}
-//!         Dql::GetIndex(name, index) => {}
-//!         Dql::GetWithoutClause(name, sort, limit) => {}
-//!         Dql::Get(name, clause, sort, limit) => {}
-//!         Dql::DeleteIndex(name, index) => {}
-//!         Dql::DeleteWithoutClause(name) => {}
-//!         Dql::Delete(name, clause) => {}
-//!         Dql::None => {}
-//!     }
-//! }
-//! ```
-
 pub fn parse(dql: &str) -> Result<Vec<Dql>, Error> {
     let pairs = DqlParser::parse(Rule::program,dql);
     if pairs.is_err() {
@@ -420,7 +363,7 @@ mod tests {
         assert!(!parsed.is_empty());
         println!("Time taken to parse {:?}",ttk.elapsed());
 
-        for ql in parsed {
+        for ql in &parsed {
             match ql {
                 Dql::Create(name, option) => {}
                 Dql::Open(name) => {}
