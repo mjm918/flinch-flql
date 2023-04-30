@@ -2,6 +2,7 @@
 extern crate pest_derive;
 extern crate pest;
 
+use std::ptr::replace;
 use anyhow::{Result, anyhow, Error};
 use pest::Parser;
 use serde_json::Value;
@@ -9,7 +10,25 @@ use pest::iterators::{Pair, Pairs};
 
 #[derive(Parser)]
 #[grammar = "./dql.pest"]
-pub struct DqlParser;
+struct DqlParser;
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum Direction {
+    Asc,
+    Desc
+}
+
+#[derive(PartialEq, Debug, Clone, Default)]
+pub struct  OffsetLimit {
+    offset: Option<u64>,
+    limit: Option<u64>
+}
+
+#[derive(PartialEq, Debug, Clone, Default)]
+pub struct SortDirection {
+    field: Option<String>,
+    direction: Option<Direction>
+}
 
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct Clause {
@@ -18,69 +37,62 @@ pub struct Clause {
 }
 
 #[derive(PartialEq, Debug, Clone)]
-pub enum DataTypes {
-    Str(String),
-    Json(Value)
-}
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum Formatted {
-    Create(DataTypes, DataTypes),
-    Open(DataTypes),
-    Drop(DataTypes),
-    Len(DataTypes),
-    Upsert(DataTypes,Option<Clause>),
-    Put(DataTypes,DataTypes),
-    Exists(DataTypes),
-    Search(DataTypes),
-    Find(Option<Clause>),
-    Get(DataTypes),
-    Delete(Option<DataTypes>,Option<Clause>),
+pub enum Dql {
+    Create(String, Value),
+    Open(String),
+    Drop(String),
+    Len(String),
+    Upsert(String,Value,Option<Clause>),
+    Put(String,String,Value),
+    Exists(String,String),
+    Search(String,String,Option<SortDirection>,Option<OffsetLimit>),
+    GetIndex(String,String),
+    GetWithoutClause(String,Option<SortDirection>,Option<OffsetLimit>),
+    Get(String,Option<Clause>,Option<SortDirection>,Option<OffsetLimit>),
+    DeleteIndex(String,String),
+    DeleteWithoutClause(String),
+    Delete(String,Option<Clause>),
     None
 }
 
-fn recur(pair: Pair<Rule>) -> Formatted {
+fn recur(pair: Pair<Rule>) -> Dql {
     let ret = match pair.as_rule() {
         Rule::expr => recur(pair.into_inner().next().unwrap()),
         Rule::create => {
             let kv = kv(pair);
-            Formatted::Create(
-                DataTypes::Str(kv.0),
-                DataTypes::Json(
-                    serde_json::from_str(
-                        &kv.1
-                    ).unwrap()
-                )
-            )
-        }
-        Rule::open => {
-            Formatted::Open(
-                DataTypes::Str(k(pair))
+            Dql::Create(
+                kv.0,
+                serde_json::from_str(
+                    &kv.1
+                ).unwrap()
             )
         }
         Rule::drop => {
-            Formatted::Drop(
-                DataTypes::Str(k(pair))
+            Dql::Drop(
+                k(pair)
             )
         }
         Rule::len => {
-            Formatted::Len(
-                DataTypes::Str(k(pair))
+            Dql::Len(
+                k(pair)
             )
         }
         Rule::upsert => {
-            let k = k(pair);
-            Formatted::Upsert(
-                DataTypes::Json(
-                    serde_json::from_str(
-                        &k
-                    ).unwrap()
-                ),
+            let kv = kv(pair);
+            Dql::Upsert(
+                kv.0,
+                serde_json::from_str(
+                    &kv.1
+                ).unwrap(),
                 None
             )
         }
         Rule::upsert_where => {
-            let mut p = pair.into_inner();
+            let mut p = pair.clone().into_inner();
+            let col = k(pair);
+
+                p.next();
+
             let lh_pair = p.next().unwrap();
             let doc: Value = serde_json::from_str(
                 &str(lh_pair)
@@ -89,60 +101,156 @@ fn recur(pair: Pair<Rule>) -> Formatted {
             let mut clause = Clause::default();
             cl(&mut clause, p);
 
-            Formatted::Upsert(DataTypes::Json(doc), Some(clause))
+            Dql::Upsert(col, doc, Some(clause))
         }
         Rule::put => {
-            let kv = kv(pair);
-            Formatted::Put(
-                DataTypes::Str(kv.0),
-                DataTypes::Json(
-                    serde_json::from_str(&kv.1.as_str()).unwrap()
-                )
+            let kv = kv(pair.clone());
+            let mut p = pair.into_inner();
+            p.next();
+            p.next();
+            let obj = str(p.next().unwrap());
+            Dql::Put(
+                kv.0,
+                kv.1,
+                serde_json::from_str(&obj.as_str()).unwrap()
             )
         }
         Rule::exi => {
-            Formatted::Exists(DataTypes::Str(k(pair)))
+            let kv = kv(pair);
+            Dql::Exists(kv.0, kv.1)
         }
         Rule::search => {
-            Formatted::Search(DataTypes::Str(k(pair)))
+            let kv = kv(pair.clone());
+            let p = pair.into_inner();
+            Dql::Search(kv.0, kv.1,sr(p.clone()),ol(p))
         }
-        Rule::find => {
+        Rule::select => {
             let mut p = pair.clone().into_inner();
-            let empty = str(p.next().unwrap());
+            let col = p.next().unwrap().as_str().to_string();
+            let empty = p.next().unwrap().as_str().to_string();
             if empty.eq("{}") {
-                Formatted::Find(None)
+                let sort = sr(p.clone());
+                let ofsl = ol(p.clone());
+
+                Dql::GetWithoutClause(col, sort,ofsl)
             } else {
                 p = pair.into_inner();
-                let mut clause = Clause::default();
-                cl(&mut clause, p);
+                p.next();
 
-                Formatted::Find(Some(clause))
+                let mut clause = Clause::default();
+                cl(&mut clause, p.clone());
+
+                let sort = sr(p.clone());
+                let ofsl = ol(p.clone());
+
+                Dql::Get(col,  Some(clause),sort,ofsl)
             }
         }
         Rule::get => {
-            Formatted::Get(DataTypes::Str(k(pair)))
+            let kv = kv(pair);
+            Dql::GetIndex(kv.0, kv.1)
         }
         Rule::delete => {
-            Formatted::Delete(Some(DataTypes::Str(k(pair))), None)
+            let kv = kv(pair);
+            Dql::DeleteIndex(kv.0, kv.1)
         }
         Rule::delete_where => {
             let mut p = pair.clone().into_inner();
-            let empty = str(p.next().unwrap());
+            let col = p.next().unwrap().as_str().to_string();
+            let empty = p.next().unwrap().as_str().to_string();
             if empty.eq("{}") {
-                Formatted::Delete(None, None)
+                Dql::DeleteWithoutClause(col)
             } else {
                 p = pair.into_inner();
+                p.next();
+
                 let mut clause = Clause::default();
                 cl(&mut clause, p);
 
-                Formatted::Delete(None,Some(clause))
+                Dql::Delete(col, Some(clause))
             }
         }
-        _=> Formatted::None
+        _=> Dql::None
     };
     ret
 }
-
+fn ol(mut p: Pairs<Rule>) -> Option<OffsetLimit> {
+    let mut offset: Option<u64> = None;
+    let mut limit: Option<u64> = None;
+    loop {
+        let next = p.next();
+        if next.is_none() {
+            break;
+        } else {
+            let next = next.unwrap();
+            match next.as_rule() {
+                Rule::offset => {
+                    let ofs = next.as_str().to_uppercase()
+                        .replace("OFFSET","")
+                        .trim()
+                        .parse::<u64>();
+                    if ofs.is_ok() {
+                        offset = Some(ofs.unwrap());
+                    }
+                }
+                Rule::limit => {
+                    let lmt = next.as_str().to_uppercase()
+                        .replace("LIMIT","")
+                        .trim()
+                        .parse::<u64>();
+                    if lmt.is_ok() {
+                        limit = Some(lmt.unwrap());
+                    }
+                }
+                _=>{}
+            }
+        }
+    }
+    if offset.is_none() && limit.is_none() {
+        None
+    } else {
+        Some(OffsetLimit {
+            offset,
+            limit,
+        })
+    }
+}
+fn sr(mut p: Pairs<Rule>) -> Option<SortDirection> {
+    let mut field: Option<String> = None;
+    let mut direction: Option<Direction> = None;
+    loop {
+        let next = p.next();
+        if next.is_none() {
+            break;
+        } else {
+            let next = next.unwrap();
+            match next.as_rule() {
+                Rule::sort => {
+                    field = Some(next.as_str()
+                        .replace("SORT","")
+                        .replace("sort","")
+                        .trim().to_string());
+                }
+                Rule::direction => {
+                    let kwr = next.as_str().trim().to_uppercase();
+                    direction = Some(
+                        match kwr.as_str() {
+                            "ASC"=> Direction::Asc,
+                            "DESC"=> Direction::Desc,
+                            _=> Direction::Asc
+                        }
+                    );
+                }
+                _=>{}
+            }
+        }
+    }
+    if field.is_none() && direction.is_none() {
+        None
+    } else {
+        Some(SortDirection{ field, direction })
+    }
+}
 fn cl(clause: &mut Clause, mut p: Pairs<Rule>) {
     let mut conjunction = format!("");
     loop {
@@ -161,7 +269,7 @@ fn cl(clause: &mut Clause, mut p: Pairs<Rule>) {
                         "$and" => {
                             clause.and = Some(Value::Array(vec![]));
                         },
-                        _=> unreachable!()
+                        _=> {}
                     }
                 }
                 Rule::clause_array => {
@@ -178,7 +286,7 @@ fn cl(clause: &mut Clause, mut p: Pairs<Rule>) {
                         }
                     }
                 }
-                _ => unreachable!()
+                _ => {}
             }
         }
     }
@@ -194,10 +302,67 @@ fn kv(opt: Pair<Rule>) -> (String, String) {
     (index_id, doc)
 }
 fn str(opt: Pair<Rule>) -> String {
-    opt.as_str().to_string().trim_matches('\'').to_string()
+    opt.as_str().to_string()
 }
 
-pub fn parse(dql: &str) -> Result<Vec<Formatted>, Error> {
+//! Example
+//! ```
+//! let ql = r#"
+//!     CREATE collection -> {};
+//!
+//!     DROP collection;
+//!
+//!     LEN collection;
+//!
+//!     UPSERT collection [{"avc":"1123"}];
+//!
+//!     UPSERT collection {"avc":"1123"} WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
+//!
+//!     PUT collection -> id -> {};
+//!
+//!     EXISTS collection -> id;
+//!
+//!     SEARCH collection -> 'your random query' OFFSET 0 LIMIT 1000000;
+//!
+//!     GET collection WHERE {} SORT id DESC OFFSET 0 LIMIT 1000000;
+//!
+//!     GET collection WHERE $or:[{"$eq":{"a.b":3}},{"$lt":{"b":3}}] OFFSET 0 LIMIT 1000000;
+//!
+//!     GET collection -> id;
+//!
+//!     DELETE collection -> id;
+//!
+//!     DELETE collection WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
+//! "#;
+//!
+//! let parsed = parse(ql);
+//! assert!(parsed.is_ok());
+//!
+//! let parsed = parsed.unwrap();
+//! assert!(!parsed.is_empty());
+//!
+//! for ql in parsed {
+//!     match ql {
+//!         Dql::Create(name, option) => {}
+//!         Dql::Open(name) => {}
+//!         Dql::Drop(name) => {}
+//!         Dql::Len(name) => {}
+//!         Dql::Upsert(name, doc, clause) => {}
+//!         Dql::Put(name, index, doc) => {}
+//!         Dql::Exists(name, index) => {}
+//!         Dql::Search(name, query, sort, limit) => {}
+//!         Dql::GetIndex(name, index) => {}
+//!         Dql::GetWithoutClause(name, sort, limit) => {}
+//!         Dql::Get(name, clause, sort, limit) => {}
+//!         Dql::DeleteIndex(name, index) => {}
+//!         Dql::DeleteWithoutClause(name) => {}
+//!         Dql::Delete(name, clause) => {}
+//!         Dql::None => {}
+//!     }
+//! }
+//! ```
+
+pub fn parse(dql: &str) -> Result<Vec<Dql>, Error> {
     let pairs = DqlParser::parse(Rule::program,dql);
     if pairs.is_err() {
         Err(anyhow!("{}",pairs.err().unwrap()))
@@ -222,11 +387,58 @@ mod tests {
     #[test]
     fn it_works() {
         let ttk = Instant::now();
-        let parsed = parse("CREATE 'collection' -> {};");
+        let ql = r#"
+            CREATE collection -> {};
+
+            DROP collection;
+
+            LEN collection;
+
+            UPSERT collection [{"avc":"1123"}];
+
+            UPSERT collection {"avc":"1123"} WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
+
+            PUT collection -> id -> {};
+
+            EXISTS collection -> id;
+
+            SEARCH collection -> 'your random query' OFFSET 0 LIMIT 1000000;
+
+            GET collection WHERE {} SORT id DESC OFFSET 0 LIMIT 1000000;
+
+            GET collection WHERE $or:[{"$eq":{"a.b":3}},{"$lt":{"b":3}}] OFFSET 0 LIMIT 1000000;
+
+            GET collection -> id;
+
+            DELETE collection -> id;
+
+            DELETE collection WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
+        "#;
+        let parsed = parse(ql);
         assert!(parsed.is_ok());
         let parsed = parsed.unwrap();
         assert!(!parsed.is_empty());
         println!("Time taken to parse {:?}",ttk.elapsed());
+
+        for ql in parsed {
+            match ql {
+                Dql::Create(name, option) => {}
+                Dql::Open(name) => {}
+                Dql::Drop(name) => {}
+                Dql::Len(name) => {}
+                Dql::Upsert(name, doc, clause) => {}
+                Dql::Put(name, index, doc) => {}
+                Dql::Exists(name, index) => {}
+                Dql::Search(name, query, sort, limit) => {}
+                Dql::GetIndex(name, index) => {}
+                Dql::GetWithoutClause(name, sort, limit) => {}
+                Dql::Get(name, clause, sort, limit) => {}
+                Dql::DeleteIndex(name, index) => {}
+                Dql::DeleteWithoutClause(name) => {}
+                Dql::Delete(name, clause) => {}
+                Dql::None => {}
+            }
+        }
 
         println!("{:?}",parsed);
     }
