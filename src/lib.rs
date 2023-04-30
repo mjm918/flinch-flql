@@ -38,7 +38,6 @@ pub struct Clause {
 #[derive(PartialEq, Debug, Clone)]
 pub enum Dql {
     Create(String, Value),
-    Open(String),
     Drop(String),
     Len(String),
     Upsert(String,Value,Option<Clause>),
