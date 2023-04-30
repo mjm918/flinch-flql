@@ -41,6 +41,7 @@ pub enum Dql {
     Drop(String),
     Len(String),
     Upsert(String,Value,Option<Clause>),
+    UpsertWithoutClause(String,Value),
     Put(String,String,Value),
     Exists(String,String),
     Search(String,String,Option<SortDirection>,Option<OffsetLimit>),
@@ -77,12 +78,11 @@ fn recur(pair: Pair<Rule>) -> Dql {
         }
         Rule::upsert => {
             let kv = kv(pair);
-            Dql::Upsert(
+            Dql::UpsertWithoutClause(
                 kv.0,
                 serde_json::from_str(
                     &kv.1
-                ).unwrap(),
-                None
+                ).unwrap()
             )
         }
         Rule::upsert_where => {
@@ -355,7 +355,7 @@ mod tests {
 
             DELETE collection WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
         "#;
-        let parsed = flinch_dql::parse(ql);
+        let parsed = parse(ql);
         assert!(parsed.is_ok());
         let parsed = parsed.unwrap();
         assert!(!parsed.is_empty());
@@ -364,10 +364,10 @@ mod tests {
         for ql in &parsed {
             match ql {
                 Dql::Create(name, option) => {}
-                Dql::Open(name) => {}
                 Dql::Drop(name) => {}
                 Dql::Len(name) => {}
                 Dql::Upsert(name, doc, clause) => {}
+                Dql::UpsertWithoutClause(name, doc) =>{}
                 Dql::Put(name, index, doc) => {}
                 Dql::Exists(name, index) => {}
                 Dql::Search(name, query, sort, limit) => {}
