@@ -21,71 +21,64 @@ To use DQL, you will need to have Flinch installed and running on your system. O
 Here `'collection'` is the name of your collection. Followed by pointer operator `->` 
 and then collection options as `json` object
 
-`CREATE 'collection' -> {};`
+`CREATE collection_name -> {};`
 
-**OPEN**
-
-Opens a collection to read/write
-
-`OPEN 'collection';`
 
 **DROP**
 
 Drop or delete a collection
 
-`DROP 'collection';`
+`DROP collection_name;`
 
 **LENGTH**
 
 Length of a collection / number of elements in a collection
 
-`LEN 'collection';`
+`LEN collection_name;`
 
 **UPSERT**
 
 Update or Insert (if not exists) documents.
 
-`UPSERT [{"avc":"1123"}];`
+`UPSERT collection_name [{"avc":"1123"}];`
 
 Update or Insert document with condition
 
-`UPSERT {"avc":"1123"} WHERE $or:[{"$eq":["a.b",1]}] $and:[{"$lt":["a",3]}];`
+`UPSERT collection_name {"avc":"1123"} WHERE $or:[{"$eq":["a.b",1]}] $and:[{"$lt":["a",3]}];`
 
 **PUT**
 
 Put with a pointer to a document ID.
 
-`PUT -> 'id' -> {};`
+`PUT collection_name -> 'id' -> {};`
 
 **EXISTS**
 
 Exists works with a pointer.
 
-`EXISTS -> 'id';`
+`EXISTS collection_name -> 'id';`
 
 **SEARCH**
 
 Works only with collection option `content_opt`. Useful when you use flinch as a search engine.
 
-`SEARCH -> 'your random query';`
-
-**FIND**
-
-`FIND` is similar to `SELECT` 
-
-1. To get all documents 
-
-`FIND WHERE {};`
-
-2. Get all documents that matches condition
-
-`FIND WHERE $or:[{"$eq":["a->b",1]},{"$lt":["a",3]}];`
+`SEARCH collection_name -> 'your random query';`
 
 **GET**
 
-`GET` works only with pointer.
+`GET` is similar to `SELECT` 
 
-`GET -> 'id';`
+1. To get all documents 
+
+`GET collection_name WHERE {};`
+
+2. Get all documents that matches condition
+
+`GET collection_name WHERE $or:[{"$eq":["a->b",1]},{"$lt":["a",3]}];`
+
+`GET` also works with pointer.
+
+`GET collection_name -> 'id';`
 
 **DELETE**
 
@@ -93,11 +86,15 @@ Works only with collection option `content_opt`. Useful when you use flinch as a
 
 1. Delete a pointer with ID
 
-`DELETE -> 'id';`
+`DELETE collection_name -> 'id';`
 
 2. Delete documents that matches condition
 
-`DELETE WHERE $or:[{"$eq":["a->b",1]}] $and:[{"$lt":["a",3]}];`
+`DELETE collection_name WHERE $or:[{"$eq":["a->b",1]}] $and:[{"$lt":["a",3]}];`
+
+# Sort, Offset, Limit
+
+`SORT prop_name DESC/ASC OFFSET u64 LIMIT u64`
 
 # Available Operators
 
@@ -123,3 +120,61 @@ Works only with collection option `content_opt`. Useful when you use flinch as a
 
 NOTE: Pointers in a condition, is used to access nested document regardless the type is array or object.
 Pointer can be defined as `doc_property->nested_doc_property`
+
+# Example
+
+```
+let ql = r#"
+    CREATE collection -> {};
+
+    DROP collection;
+
+    LEN collection;
+
+    UPSERT collection [{"avc":"1123"}];
+
+    UPSERT collection {"avc":"1123"} WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
+
+    PUT collection -> id -> {};
+
+    EXISTS collection -> id;
+
+    SEARCH collection -> 'your random query' OFFSET 0 LIMIT 1000000;
+
+    GET collection WHERE {} SORT id DESC OFFSET 0 LIMIT 1000000;
+
+    GET collection WHERE $or:[{"$eq":{"a.b":3}},{"$lt":{"b":3}}] OFFSET 0 LIMIT 1000000;
+
+    GET collection -> id;
+
+    DELETE collection -> id;
+
+    DELETE collection WHERE $or:[{"$eq":{"a.b":1}}] $and:[{"$lt":{"a":3}}];
+"#;
+
+let parsed = parse(ql);
+assert!(parsed.is_ok());
+
+let parsed = parsed.unwrap();
+assert!(!parsed.is_empty());
+
+for ql in parsed {
+    match ql {
+        Dql::Create(name, option) => {}
+        Dql::Open(name) => {}
+        Dql::Drop(name) => {}
+        Dql::Len(name) => {}
+        Dql::Upsert(name, doc, clause) => {}
+        Dql::Put(name, index, doc) => {}
+        Dql::Exists(name, index) => {}
+        Dql::Search(name, query, sort, limit) => {}
+        Dql::GetIndex(name, index) => {}
+        Dql::GetWithoutClause(name, sort, limit) => {}
+        Dql::Get(name, clause, sort, limit) => {}
+        Dql::DeleteIndex(name, index) => {}
+        Dql::DeleteWithoutClause(name) => {}
+        Dql::Delete(name, clause) => {}
+        Dql::None => {}
+    }
+}
+```
