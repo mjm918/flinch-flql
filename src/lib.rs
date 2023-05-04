@@ -19,20 +19,20 @@ pub enum Direction {
 
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct  OffsetLimit {
-    offset: Option<u64>,
-    limit: Option<u64>
+    pub offset: Option<u64>,
+    pub limit: Option<u64>
 }
 
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct SortDirection {
-    field: Option<String>,
-    direction: Option<Direction>
+    pub field: Option<String>,
+    pub direction: Option<Direction>
 }
 
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct Clause {
-    and: Option<Value>,
-    or: Option<Value>
+    pub and: Option<Value>,
+    pub or: Option<Value>
 }
 
 #[derive(PartialEq, Debug, Clone)]
