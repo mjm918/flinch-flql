@@ -19,13 +19,13 @@ use pest::iterators::{Pair};
 /// `length('');` <br>
 ///
 /// **Update or Insert into collection** <br>
-/// `upsert({}).into('');` <br>
+/// `put({}).into('');` <br>
 ///
 /// **Conditional Update or Insert into collection** <br>
-/// `upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');` <br>
+/// `put({}).when(:includes(array_filter('e.f$.g'),2):).into('');` <br>
 ///
 /// **Update or Insert into collection to a Pointer** <br>
-/// `upsert({}).pointer('').into('');` <br>
+/// `put({}).pointer('').into('');` <br>
 ///
 /// **Get from collection** <br>
 /// `get.from('');` <br>
@@ -66,9 +66,9 @@ use pest::iterators::{Pair};
 ///             "drop('');",
 ///             "exists('').into('');",
 ///             "length('');",
-///             "upsert({}).into('');",
-///             "upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
-///             "upsert({}).pointer('').into('');",
+///             "put({}).into('');",
+///             "put({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
+///             "put({}).pointer('').into('');",
 ///             "get.from('');",
 ///             "get.when(:includes(array_filter('e.f$.g'),2):).from('');",
 ///             "get.pointer('').from('');",
@@ -90,9 +90,9 @@ use pest::iterators::{Pair};
 ///                     Flql::Drop(_) => {}
 ///                     Flql::Exists(_,_) => {}
 ///                     Flql::Length(_) => {}
-///                     Flql::Upsert(_, _) => {}
-///                     Flql::UpsertWhen(_, _, _) => {}
-///                     Flql::UpsertPointer(_, _, _) => {}
+///                     Flql::Put(_, _) => {}
+///                     Flql::PutWhen(_, _, _) => {}
+///                     Flql::PutPointer(_, _, _) => {}
 ///                     Flql::Get(_) => {}
 ///                     Flql::GetWhen(_, _) => {}
 ///                     Flql::GetPointer(_, _) => {}
@@ -119,9 +119,9 @@ pub enum Flql {
     Drop(String),
     Exists(String, String),
     Length(String),
-    Upsert(String,String),
-    UpsertWhen(String, String, String),
-    UpsertPointer(String, String, String),
+    Put(String,String),
+    PutWhen(String, String, String),
+    PutPointer(String, String, String),
     Get(String),
     GetWhen(String, String),
     GetPointer(String, String),
@@ -154,24 +154,24 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         Rule::length => {
             Flql::Length(one(pair).to_string())
         }
-        Rule::upsert => {
+        Rule::put => {
             let two = two(pair);
-            Flql::Upsert(
+            Flql::Put(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
-        Rule::upsert_when => {
+        Rule::put_when => {
             let three = three(pair);
-            Flql::UpsertWhen(
+            Flql::PutWhen(
                 three[0].to_string(),
                 three[1].to_string(),
                 three[2].to_string()
             )
         }
-        Rule::upsert_pointer => {
+        Rule::put_pointer => {
             let three = three(pair);
-            Flql::UpsertPointer(
+            Flql::PutPointer(
                 three[0].to_string(),
                 three[1].to_string(),
                 three[2].to_string()
@@ -302,9 +302,9 @@ mod tests {
             "drop('');",
             "exists('').into('');",
             "length('');",
-            "upsert({}).into('');",
-            "upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
-            "upsert({}).pointer('').into('');",
+            "put({}).into('');",
+            "put({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
+            "put({}).pointer('').into('');",
             "get.from('');",
             "get.when(:includes(array_filter('e.f$.g'),2):).from('');",
             "get.pointer('').from('');",
@@ -326,9 +326,9 @@ mod tests {
                     Flql::Drop(_) => {}
                     Flql::Exists(_,_) => {}
                     Flql::Length(_) => {}
-                    Flql::Upsert(_, _) => {}
-                    Flql::UpsertWhen(_, _, _) => {}
-                    Flql::UpsertPointer(_, _, _) => {}
+                    Flql::Put(_, _) => {}
+                    Flql::PutWhen(_, _, _) => {}
+                    Flql::PutPointer(_, _, _) => {}
                     Flql::Get(_) => {}
                     Flql::GetWhen(_, _) => {}
                     Flql::GetPointer(_, _) => {}

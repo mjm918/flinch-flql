@@ -29,13 +29,13 @@ To use FLQL, you will need to have Flinch installed and running on your system. 
 `length('');` <br>
 
 > Update or Insert into collection <br>
-`upsert({}).into('');` <br>
+`put({}).into('');` <br>
 
 > Conditional Update or Insert into collection <br>
-`upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');` <br>
+`put({}).when(:includes(array_filter('e.f$.g'),2):).into('');` <br>
 
 > Update or Insert into collection to a Pointer <br>
-`upsert({}).pointer('').into('');` <br>
+`put({}).pointer('').into('');` <br>
 
 > Get from collection <br>
 `get.from('');` <br>

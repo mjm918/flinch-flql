@@ -6,9 +6,9 @@ expr = {
     drop |
     exists |
     length |
-    upsert |
-    upsert_when |
-    upsert_pointer |
+    put |
+    put_when |
+    put_pointer |
     get |
     get_when |
     get_pointer |
@@ -26,9 +26,9 @@ drop = { "drop" ~ "(" ~ collection ~ ")" }
 exists = { "exists" ~ "(" ~ pointer ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
 length = { "length"~"("~ collection ~ ")" }
 
-upsert = { "upsert"~"(" ~ document ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
-upsert_when = { "upsert"~"("~document~")"~"."~"when"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
-upsert_pointer = { "upsert"~"("~document~")"~"."~"pointer"~"("~pointer~")"~"."~"into"~"(" ~ collection ~ ")" }
+put = { "put"~"(" ~ document ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
+put_when = { "put"~"("~document~")"~"."~"when"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
+put_pointer = { "put"~"("~document~")"~"."~"pointer"~"("~pointer~")"~"."~"into"~"(" ~ collection ~ ")" }
 
 get = { "get"~"."~"from"~"("~ collection ~")" }
 get_when = { "get"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" }
