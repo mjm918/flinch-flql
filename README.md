@@ -64,6 +64,6 @@ To use DQL, you will need to have Flinch installed and running on your system. O
 > Delete View from collection <br>
 `delete.view('').from('');` <br>
 
-**Delete Clip from collection <br>
+>Delete Clip from collection <br>
 `delete.clip('').from('');` <br>
 
