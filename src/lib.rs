@@ -5,6 +5,110 @@ extern crate pest;
 use pest::Parser;
 use pest::iterators::{Pair, Pairs};
 
+
+/// **Create collection** <br>
+/// `new({});` <br>
+///
+/// **Drop collection** <br>
+/// `drop('');` <br>
+///
+/// **Check if pointer exists in collection** <br>
+/// `exists('').into('');` <br>
+///
+/// **Length of collection** <br>
+/// `length('');` <br>
+///
+/// **Update or Insert into collection** <br>
+/// `upsert({}).into('');` <br>
+///
+/// **Conditional Update or Insert into collection** <br>
+/// `upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');` <br>
+///
+/// **Update or Insert into collection to a Pointer** <br>
+/// `upsert({}).pointer('').into('');` <br>
+///
+/// **Get from collection** <br>
+/// `get.from('');` <br>
+///
+/// **Conditional Get from collection** <br>
+/// `get.when(:includes(array_filter('e.f$.g'),2):).from('');` <br>
+///
+/// **Get Pointer from collection** <br>
+/// `get.pointer('').from('');` <br>
+///
+/// **Get View from collection** <br>
+/// `get.view('').from('');` <br>
+///
+/// **Get Clip from collection** <br>
+/// `get.clip('').from('');` <br>
+///
+/// **Delete from collection** <br>
+/// `delete.from('');` <br>
+///
+/// **Conditional Delete from collection** <br>
+/// `delete.when(:includes(array_filter('e.f$.g'),2):).from('');` <br>
+///
+/// **Delete Pointer from collection** <br>
+/// `delete.pointer('').from('');` <br>
+///
+/// **Delete View from collection** <br>
+/// `delete.view('').from('');` <br>
+///
+/// **Delete Clip from collection** <br>
+/// `delete.clip('').from('');` <br>
+/// <br><br>
+/// # Example
+/// <br><br>
+/// ```rust
+///         use dql::{parse, Dql};
+///         let commands = vec![
+///             "new({});",
+///             "drop('');",
+///             "exists('').into('');",
+///             "length('');",
+///             "upsert({}).into('');",
+///             "upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
+///             "upsert({}).pointer('').into('');",
+///             "get.from('');",
+///             "get.when(:includes(array_filter('e.f$.g'),2):).from('');",
+///             "get.pointer('').from('');",
+///             "get.view('').from('');",
+///             "get.clip('').from('');",
+///             "delete.from('');",
+///             "delete.when(:includes(array_filter('e.f$.g'),2):).from('');",
+///             "delete.pointer('').from('');",
+///             "delete.view('').from('');",
+///             "delete.clip('').from('');"
+///         ];
+///         for command in commands {
+///             let chk = parse(command);
+///             assert!(chk.is_ok(),"{:?}",chk.err());
+///             if chk.is_ok() {
+///                 let parsed = chk.unwrap();
+///                 match parsed {
+///                     Dql::New(_) => {}
+///                     Dql::Drop(_) => {}
+///                     Dql::Exists(_) => {}
+///                     Dql::Length(_) => {}
+///                     Dql::Upsert(_, _) => {}
+///                     Dql::UpsertWhen(_, _, _) => {}
+///                     Dql::UpsertPointer(_, _, _) => {}
+///                     Dql::Get(_) => {}
+///                     Dql::GetWhen(_, _) => {}
+///                     Dql::GetPointer(_, _) => {}
+///                     Dql::GetView(_, _) => {}
+///                     Dql::GetClip(_, _) => {}
+///                     Dql::Delete(_) => {}
+///                     Dql::DeleteWhen(_, _) => {}
+///                     Dql::DeletePointer(_, _) => {}
+///                     Dql::DeleteView(_, _) => {}
+///                     Dql::DeleteClip(_, _) => {}
+///                     Dql::None => {}
+///                 }
+///             }
+///         }
+/// ```
+
 #[derive(Parser)]
 #[grammar = "/Users/julfikar/Documents/Personal.nosync/dql/dql.pest"]
 struct DqlParser;
@@ -185,15 +289,55 @@ pub fn parse(dql: &str) -> Result<Dql, String> {
 
 #[cfg(test)]
 mod tests {
-    use pest::Parser;
-    use crate::parse;
+    use crate::{Dql, parse};
 
     #[test]
     fn test() {
         let commands = vec![
             "new({});",
-            "drop('')",
-            ""
+            "drop('');",
+            "exists('').into('');",
+            "length('');",
+            "upsert({}).into('');",
+            "upsert({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
+            "upsert({}).pointer('').into('');",
+            "get.from('');",
+            "get.when(:includes(array_filter('e.f$.g'),2):).from('');",
+            "get.pointer('').from('');",
+            "get.view('').from('');",
+            "get.clip('').from('');",
+            "delete.from('');",
+            "delete.when(:includes(array_filter('e.f$.g'),2):).from('');",
+            "delete.pointer('').from('');",
+            "delete.view('').from('');",
+            "delete.clip('').from('');"
         ];
+        for command in commands {
+            let chk = parse(command);
+            assert!(chk.is_ok(),"{:?}",chk.err());
+            if chk.is_ok() {
+                let parsed = chk.unwrap();
+                match parsed {
+                    Dql::New(_) => {}
+                    Dql::Drop(_) => {}
+                    Dql::Exists(_) => {}
+                    Dql::Length(_) => {}
+                    Dql::Upsert(_, _) => {}
+                    Dql::UpsertWhen(_, _, _) => {}
+                    Dql::UpsertPointer(_, _, _) => {}
+                    Dql::Get(_) => {}
+                    Dql::GetWhen(_, _) => {}
+                    Dql::GetPointer(_, _) => {}
+                    Dql::GetView(_, _) => {}
+                    Dql::GetClip(_, _) => {}
+                    Dql::Delete(_) => {}
+                    Dql::DeleteWhen(_, _) => {}
+                    Dql::DeletePointer(_, _) => {}
+                    Dql::DeleteView(_, _) => {}
+                    Dql::DeleteClip(_, _) => {}
+                    Dql::None => {}
+                }
+            }
+        }
     }
 }

@@ -27,7 +27,7 @@ exists = { "exists" ~ "(" ~ pointer ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
 length = { "length"~"("~ collection ~ ")" }
 
 upsert = { "upsert"~"(" ~ document ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
-upsert_when = { "upsert"~"(" ~ document ~ ")"~"."~"when"~"("~ condition ~")"~"."~"into"~"(" ~ collection ~ ")" }
+upsert_when = { "upsert"~"("~document~")"~"."~"when"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
 upsert_pointer = { "upsert"~"("~document~")"~"."~"pointer"~"("~pointer~")"~"."~"into"~"(" ~ collection ~ ")" }
 
 get = { "get"~"."~"from"~"("~ collection ~")" }
@@ -42,14 +42,13 @@ delete_pointer = { "delete"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~coll
 delete_view = { "delete"~"."~"view"~"(" ~ view ~ ")"~"."~"from"~"("~collection~")" }
 delete_clip = { "delete"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
 
-collection = @{non_empty_str}
+collection = @{quots}
 pointer = @{quots}
 view = @{quots}
 clip = @{quots}
 document = @{object}
-condition = @{ ASCII_ALPHANUMERIC+ }
+condition = @{ ":" ~ ( "::" | (!":" ~ ANY) )* ~ ":" }
 
-non_empty_str = @{ "'" ~ (!"'" ~ ASCII_ALPHA+)* ~ "'" }
 quots = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
 object = {
     "{" ~ "}" |
