@@ -1,20 +1,20 @@
-# DQL - Document Query Language
+# FLQL - Flinch Query Language
 
 [![Rust](https://github.com/mjm918/dql/actions/workflows/rust.yml/badge.svg)](https://github.com/mjm918/dql/actions/workflows/rust.yml)
 
-DQL (Document Query Language) is a lightweight query language designed to retrieve data from an in-memory database called Flinch. Flinch is a real-time unstructured document database that is capable of storing and retrieving documents in JSON format.
+FLQL - Flinch Query Language is a lightweight query language designed to retrieve data from an in-memory database called Flinch. Flinch is a real-time unstructured document database that is capable of storing and retrieving documents in JSON format.
 
-DQL was created to simplify the querying process in Flinch and make it easier for developers to retrieve data from the database. It is a simple, intuitive, and expressive language that is easy to learn and use.
+FLQL was created to simplify the querying process in Flinch and make it easier for developers to retrieve data from the database. It is a simple, intuitive, and expressive language that is easy to learn and use.
 
 # Features:
 
-- DQL supports basic CRUD (Create, Read, Update, Delete) operations.
+- FLQL supports basic CRUD (Create, Read, Update, Delete) operations.
 - It supports querying documents based on a variety of criteria, including text matching, date range, and numerical range.
 - It uses a simple and intuitive syntax that is easy to read and write.
-- DQL is optimized for performance and can handle large datasets with ease.
+- FLQL is optimized for performance and can handle large datasets with ease.
 
 # Getting Started:
-To use DQL, you will need to have Flinch installed and running on your system. Once Flinch is up and running, you can start querying your data using DQL.
+To use FLQL, you will need to have Flinch installed and running on your system. Once Flinch is up and running, you can start querying your data using FLQL.
 
 > Create collection <br>
 `new({});` <br>
