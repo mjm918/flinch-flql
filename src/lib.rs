@@ -77,7 +77,6 @@ use pest::iterators::{Pair};
 ///             "delete.from('');",
 ///             "delete.when(:includes(array_filter('e.f$.g'),2):).from('');",
 ///             "delete.pointer('').from('');",
-///             "delete.view('').from('');",
 ///             "delete.clip('').from('');"
 ///         ];
 ///         for command in commands {
@@ -98,10 +97,11 @@ use pest::iterators::{Pair};
 ///                     Flql::GetPointer(_, _) => {}
 ///                     Flql::GetView(_, _) => {}
 ///                     Flql::GetClip(_, _) => {}
+///                     Flql::GetIndex(_,_) => {}
+///                     Flql::GetRange(_,_,_) => {}
 ///                     Flql::Delete(_) => {}
 ///                     Flql::DeleteWhen(_, _) => {}
 ///                     Flql::DeletePointer(_, _) => {}
-///                     Flql::DeleteView(_, _) => {}
 ///                     Flql::DeleteClip(_, _) => {}
 ///                     Flql::None => {}
 ///                 }
@@ -127,10 +127,11 @@ pub enum Flql {
     GetPointer(String, String),
     GetView(String, String),
     GetClip(String, String),
+    GetIndex(String, String),
+    GetRange(String, String, String),
     Delete(String),
     DeleteWhen(String, String),
     DeletePointer(String, String),
-    DeleteView(String, String),
     DeleteClip(String, String),
     None
 }
@@ -180,6 +181,21 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         Rule::get => {
             Flql::Get(one(pair).to_string())
         }
+        Rule::get_index => {
+            let two = two(pair);
+            Flql::GetIndex(
+                two[0].to_string(),
+                two[1].to_string()
+            )
+        }
+        Rule::get_range => {
+            let three = three(pair);
+            Flql::GetRange(
+                three[0].to_string(),
+                three[1].to_string(),
+                three[2].to_string()
+            )
+        }
         Rule::get_when => {
             let two = two(pair);
             Flql::GetWhen(
@@ -221,13 +237,6 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         Rule::delete_pointer => {
             let two = two(pair);
             Flql::DeletePointer(
-                two[0].to_string(),
-                two[1].to_string()
-            )
-        }
-        Rule::delete_view => {
-            let two = two(pair);
-            Flql::DeleteView(
                 two[0].to_string(),
                 two[1].to_string()
             )
@@ -313,7 +322,6 @@ mod tests {
             "delete.from('');",
             "delete.when(:includes(array_filter('e.f$.g'),2):).from('');",
             "delete.pointer('').from('');",
-            "delete.view('').from('');",
             "delete.clip('').from('');"
         ];
         for command in commands {
@@ -334,10 +342,11 @@ mod tests {
                     Flql::GetPointer(_, _) => {}
                     Flql::GetView(_, _) => {}
                     Flql::GetClip(_, _) => {}
+                    Flql::GetIndex(_,_) => {}
+                    Flql::GetRange(_,_,_) => {}
                     Flql::Delete(_) => {}
                     Flql::DeleteWhen(_, _) => {}
                     Flql::DeletePointer(_, _) => {}
-                    Flql::DeleteView(_, _) => {}
                     Flql::DeleteClip(_, _) => {}
                     Flql::None => {}
                 }
