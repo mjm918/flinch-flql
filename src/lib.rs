@@ -88,7 +88,7 @@ use pest::iterators::{Pair};
 ///                 match parsed {
 ///                     Flql::New(_) => {}
 ///                     Flql::Drop(_) => {}
-///                     Flql::Exists(_) => {}
+///                     Flql::Exists(_,_) => {}
 ///                     Flql::Length(_) => {}
 ///                     Flql::Upsert(_, _) => {}
 ///                     Flql::UpsertWhen(_, _, _) => {}
@@ -117,7 +117,7 @@ struct FlqlParser;
 pub enum Flql {
     New(String),
     Drop(String),
-    Exists(String),
+    Exists(String, String),
     Length(String),
     Upsert(String,String),
     UpsertWhen(String, String, String),
@@ -145,7 +145,11 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
             Flql::Drop(one(pair).to_string())
         }
         Rule::exists => {
-            Flql::Exists(one(pair).to_string())
+            let two = two(pair);
+            Flql::Exists(
+                two[0].to_string(),
+                two[1].to_string()
+            )
         }
         Rule::length => {
             Flql::Length(one(pair).to_string())
@@ -320,7 +324,7 @@ mod tests {
                 match parsed {
                     Flql::New(_) => {}
                     Flql::Drop(_) => {}
-                    Flql::Exists(_) => {}
+                    Flql::Exists(_,_) => {}
                     Flql::Length(_) => {}
                     Flql::Upsert(_, _) => {}
                     Flql::UpsertWhen(_, _, _) => {}
