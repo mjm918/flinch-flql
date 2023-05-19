@@ -2,7 +2,12 @@
 name = "flql"
 version = "0.1.0"
 edition = "2021"
-
+authors = ["Mohammad Julfikar <julfikar@eztech.com.my>", "Mohammad Julfikar <md.julfikar.mahmud@gmail.com>"]
+categories = ["parser-implementations"]
+description = "Query parser for flinch in-memory database"
+keywords = ["flql","flinch","dql","parser"]
+license = "Apache-2.0"
+repository = "https://github.com/mjm918/flinch-flql"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
