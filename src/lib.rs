@@ -3,7 +3,7 @@ extern crate pest_derive;
 extern crate pest;
 
 use pest::Parser;
-use pest::iterators::{Pair, Pairs};
+use pest::iterators::{Pair};
 
 
 /// **Create collection** <br>
@@ -60,7 +60,7 @@ use pest::iterators::{Pair, Pairs};
 /// # Example
 /// <br><br>
 /// ```rust
-///         use dql::{parse, Dql};
+///         use flql::{parse, Flql};
 ///         let commands = vec![
 ///             "new({});",
 ///             "drop('');",
@@ -86,35 +86,35 @@ use pest::iterators::{Pair, Pairs};
 ///             if chk.is_ok() {
 ///                 let parsed = chk.unwrap();
 ///                 match parsed {
-///                     Dql::New(_) => {}
-///                     Dql::Drop(_) => {}
-///                     Dql::Exists(_) => {}
-///                     Dql::Length(_) => {}
-///                     Dql::Upsert(_, _) => {}
-///                     Dql::UpsertWhen(_, _, _) => {}
-///                     Dql::UpsertPointer(_, _, _) => {}
-///                     Dql::Get(_) => {}
-///                     Dql::GetWhen(_, _) => {}
-///                     Dql::GetPointer(_, _) => {}
-///                     Dql::GetView(_, _) => {}
-///                     Dql::GetClip(_, _) => {}
-///                     Dql::Delete(_) => {}
-///                     Dql::DeleteWhen(_, _) => {}
-///                     Dql::DeletePointer(_, _) => {}
-///                     Dql::DeleteView(_, _) => {}
-///                     Dql::DeleteClip(_, _) => {}
-///                     Dql::None => {}
+///                     Flql::New(_) => {}
+///                     Flql::Drop(_) => {}
+///                     Flql::Exists(_) => {}
+///                     Flql::Length(_) => {}
+///                     Flql::Upsert(_, _) => {}
+///                     Flql::UpsertWhen(_, _, _) => {}
+///                     Flql::UpsertPointer(_, _, _) => {}
+///                     Flql::Get(_) => {}
+///                     Flql::GetWhen(_, _) => {}
+///                     Flql::GetPointer(_, _) => {}
+///                     Flql::GetView(_, _) => {}
+///                     Flql::GetClip(_, _) => {}
+///                     Flql::Delete(_) => {}
+///                     Flql::DeleteWhen(_, _) => {}
+///                     Flql::DeletePointer(_, _) => {}
+///                     Flql::DeleteView(_, _) => {}
+///                     Flql::DeleteClip(_, _) => {}
+///                     Flql::None => {}
 ///                 }
 ///             }
 ///         }
 /// ```
 
 #[derive(Parser)]
-#[grammar = "/Users/julfikar/Documents/Personal.nosync/dql/dql.pest"]
-struct DqlParser;
+#[grammar = "./flql.pest"]
+struct FlqlParser;
 
 #[derive(PartialEq, Debug, Clone)]
-pub enum Dql {
+pub enum Flql {
     New(String),
     Drop(String),
     Exists(String),
@@ -135,31 +135,31 @@ pub enum Dql {
     None
 }
 
-fn pair_parser(pair: Pair<Rule>) -> Dql  {
+fn pair_parser(pair: Pair<Rule>) -> Flql {
     match pair.as_rule() {
         Rule::expr => pair_parser(pair.into_inner().next().unwrap()),
         Rule::new => {
-            Dql::New(one(pair).to_string())
+            Flql::New(one(pair).to_string())
         }
         Rule::drop => {
-            Dql::Drop(one(pair).to_string())
+            Flql::Drop(one(pair).to_string())
         }
         Rule::exists => {
-            Dql::Exists(one(pair).to_string())
+            Flql::Exists(one(pair).to_string())
         }
         Rule::length => {
-            Dql::Length(one(pair).to_string())
+            Flql::Length(one(pair).to_string())
         }
         Rule::upsert => {
             let two = two(pair);
-            Dql::Upsert(
+            Flql::Upsert(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::upsert_when => {
             let three = three(pair);
-            Dql::UpsertWhen(
+            Flql::UpsertWhen(
                 three[0].to_string(),
                 three[1].to_string(),
                 three[2].to_string()
@@ -167,75 +167,75 @@ fn pair_parser(pair: Pair<Rule>) -> Dql  {
         }
         Rule::upsert_pointer => {
             let three = three(pair);
-            Dql::UpsertPointer(
+            Flql::UpsertPointer(
                 three[0].to_string(),
                 three[1].to_string(),
                 three[2].to_string()
             )
         }
         Rule::get => {
-            Dql::Get(one(pair).to_string())
+            Flql::Get(one(pair).to_string())
         }
         Rule::get_when => {
             let two = two(pair);
-            Dql::GetWhen(
+            Flql::GetWhen(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::get_pointer => {
             let two = two(pair);
-            Dql::GetPointer(
+            Flql::GetPointer(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::get_view => {
             let two = two(pair);
-            Dql::GetView(
+            Flql::GetView(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::get_clip => {
             let two = two(pair);
-            Dql::GetClip(
+            Flql::GetClip(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::delete => {
-            Dql::Delete(one(pair).to_string())
+            Flql::Delete(one(pair).to_string())
         }
         Rule::delete_when => {
             let two = two(pair);
-            Dql::DeleteWhen(
+            Flql::DeleteWhen(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::delete_pointer => {
             let two = two(pair);
-            Dql::DeletePointer(
+            Flql::DeletePointer(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::delete_view => {
             let two = two(pair);
-            Dql::DeleteView(
+            Flql::DeleteView(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
         Rule::delete_clip => {
             let two = two(pair);
-            Dql::DeleteClip(
+            Flql::DeleteClip(
                 two[0].to_string(),
                 two[1].to_string()
             )
         }
-        _ => Dql::None
+        _ => Flql::None
     }
 }
 
@@ -263,8 +263,8 @@ fn str(opt: Pair<Rule>) -> String {
     opt.as_str().to_string()
 }
 
-pub fn parse(dql: &str) -> Result<Dql, String> {
-    let pairs = DqlParser::parse(Rule::program,dql);
+pub fn parse(dql: &str) -> Result<Flql, String> {
+    let pairs = FlqlParser::parse(Rule::program, dql);
     return if pairs.is_ok() {
         let mut node = None;
         let pairs = pairs.unwrap();
@@ -289,7 +289,7 @@ pub fn parse(dql: &str) -> Result<Dql, String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Dql, parse};
+    use crate::{Flql, parse};
 
     #[test]
     fn test() {
@@ -318,24 +318,24 @@ mod tests {
             if chk.is_ok() {
                 let parsed = chk.unwrap();
                 match parsed {
-                    Dql::New(_) => {}
-                    Dql::Drop(_) => {}
-                    Dql::Exists(_) => {}
-                    Dql::Length(_) => {}
-                    Dql::Upsert(_, _) => {}
-                    Dql::UpsertWhen(_, _, _) => {}
-                    Dql::UpsertPointer(_, _, _) => {}
-                    Dql::Get(_) => {}
-                    Dql::GetWhen(_, _) => {}
-                    Dql::GetPointer(_, _) => {}
-                    Dql::GetView(_, _) => {}
-                    Dql::GetClip(_, _) => {}
-                    Dql::Delete(_) => {}
-                    Dql::DeleteWhen(_, _) => {}
-                    Dql::DeletePointer(_, _) => {}
-                    Dql::DeleteView(_, _) => {}
-                    Dql::DeleteClip(_, _) => {}
-                    Dql::None => {}
+                    Flql::New(_) => {}
+                    Flql::Drop(_) => {}
+                    Flql::Exists(_) => {}
+                    Flql::Length(_) => {}
+                    Flql::Upsert(_, _) => {}
+                    Flql::UpsertWhen(_, _, _) => {}
+                    Flql::UpsertPointer(_, _, _) => {}
+                    Flql::Get(_) => {}
+                    Flql::GetWhen(_, _) => {}
+                    Flql::GetPointer(_, _) => {}
+                    Flql::GetView(_, _) => {}
+                    Flql::GetClip(_, _) => {}
+                    Flql::Delete(_) => {}
+                    Flql::DeleteWhen(_, _) => {}
+                    Flql::DeletePointer(_, _) => {}
+                    Flql::DeleteView(_, _) => {}
+                    Flql::DeleteClip(_, _) => {}
+                    Flql::None => {}
                 }
             }
         }
