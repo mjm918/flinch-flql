@@ -1,158 +1,81 @@
-//
-// Created by intellij-pest on 2023-04-29
-// dql
-// Author: julfikar
-//
-//
-// Created by intellij-pest on 2023-04-27
-// grammar
-// Author: julfikar
-//
-
-program = _{ SOI ~ ";"* ~ (stmt ~ ";"+)* ~ stmt? ~ EOI }
-stmt    = _{ expr }
+program = _{ SOI ~ ";"* ~ (stmt ~ ";"+) ~ stmt? ~ EOI }
+stmt = _{ expr }
 
 expr = {
-    create
-  | drop
-  | len
-  | upsert
-  | upsert_where
-  | put
-  | exi
-  | search
-  | get
-  | select
-  | delete
-  | delete_where
+	new |
+    drop |
+    exists |
+    length |
+    upsert |
+    upsert_when |
+    upsert_pointer |
+    get |
+    get_when |
+    get_pointer |
+    get_view |
+    get_clip |
+    delete |
+    delete_when |
+    delete_pointer |
+    delete_view |
+    delete_clip
 }
 
-create = { cmd_create ~ name ~ "->" ~ object }
-drop   = { cmd_drop ~ name }
-len    = { cmd_len ~ name }
+new = { "new" ~ "(" ~ object ~ ")" }
+drop = { "drop" ~ "(" ~ collection ~ ")" }
+exists = { "exists" ~ "(" ~ pointer ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
+length = { "length"~"("~ collection ~ ")" }
 
-upsert       = { cmd_upsert ~ name ~ array }
-upsert_where = { cmd_upsert ~ name ~ object ~ cmd_where ~ clause }
+upsert = { "upsert"~"(" ~ document ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
+upsert_when = { "upsert"~"(" ~ document ~ ")"~"."~"when"~"("~ condition ~")"~"."~"into"~"(" ~ collection ~ ")" }
+upsert_pointer = { "upsert"~"("~document~")"~"."~"pointer"~"("~pointer~")"~"."~"into"~"(" ~ collection ~ ")" }
 
-put    = { cmd_put ~ name ~ "->" ~ key ~ "->" ~ object }
-exi    = { cmd_exists ~ name ~ "->" ~ key }
-search = { cmd_search ~ name ~ "->" ~ query ~ sort? ~direction? ~ offset? ~ limit? }
+get = { "get"~"."~"from"~"("~ collection ~")" }
+get_when = { "get"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" }
+get_pointer = { "get"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~collection~")" }
+get_view = { "get"~"."~"view"~"(" ~ view ~ ")"~"."~"from"~"("~collection~")" }
+get_clip = { "get"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
 
-select = { cmd_get ~ name ~ cmd_where ~ clause ~ sort? ~direction? ~ offset? ~ limit? }
-get    = { cmd_get ~ name ~ "->" ~ key }
+delete = { "delete"~"."~"from"~"(" ~ collection ~ ")" }
+delete_when = { "delete"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" }
+delete_pointer = { "delete"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~collection~")" }
+delete_view = { "delete"~"."~"view"~"(" ~ view ~ ")"~"."~"from"~"("~collection~")" }
+delete_clip = { "delete"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
 
-delete       = { cmd_delete ~ name ~ "->" ~ key }
-delete_where = { cmd_delete ~ name ~ cmd_where ~ clause }
+collection = @{non_empty_str}
+pointer = @{quots}
+view = @{quots}
+clip = @{quots}
+document = @{object}
+condition = @{ ASCII_ALPHANUMERIC+ }
 
-compare = {
-    "$like"
-  | "$gte"
-  | "$lte"
-  | "$inc"
-  | "$ninc"
-  | "$eq"
-  | "$neq"
-  | "$gt"
-  | "$lt"
-}
-
-cmd_create = _{("CREATE" | "create")}
-cmd_drop = _{("DROP" | "drop")}
-cmd_len = _{("LEN" | "len")}
-cmd_upsert = _{("UPSERT" | "upsert")}
-cmd_put = _{("PUT" | "put")}
-cmd_exists = _{("EXISTS" | "exists")}
-cmd_search = _{("SEARCH" | "search")}
-cmd_get = _{("GET" | "get")}
-cmd_delete = _{("DELETE" | "delete")}
-cmd_where = _{("WHERE" | "where")}
-cmd_sort = _{("SORT" | "sort")}
-cmd_asc = _{("ASC" | "asc")}
-cmd_desc = _{("DESC" | "desc")}
-cmd_offset = _{("OFFSET" | "offset")}
-cmd_limit = _{("LIMIT" | "limit")}
-
-key = @{
-    name
-}
-
-name = @{
-    ('a'..'z')+
-}
-
-query = @{
-    quots
-}
-
-sort = {
-    cmd_sort ~ ('a'..'z')+
-}
-
-direction = {
-	(cmd_asc | cmd_desc)+
-}
-
-offset = {
-	cmd_offset ~ ('0'..'9')+
-}
-
-limit = {
-    cmd_limit ~ ('0'..'9')+
-}
-
-conjunction = {
-    "$and"
-  | "$or"
-}
-
-clause = _{
-    object
-  | (conjunction ~ ":" ~ clause_array)*
-}
-
-clause_object = {
-    "{\"" ~ compare ~ "\":" ~ "{" ~ string ~ ":" ~ (number | boolean | null) ~ "}}"
-}
-
-clause_array = {
-    "[" ~ clause_object ~ ("," ~ clause_object)* ~ "]"
-}
-
-quots = @{ "'" ~ ("''" | (!"'" ~ ANY))* ~ "'" }
-
-// JSON
-json = _{ (object | array) }
-
-value = _{ object | array | string | number | boolean | null }
-
+non_empty_str = @{ "'" ~ (!"'" ~ ASCII_ALPHA+)* ~ "'" }
+quots = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
 object = {
-    "{" ~ "}"
-  | "{" ~ pair ~ ("," ~ pair)* ~ "}"
+    "{" ~ "}" |
+    "{" ~ pair ~ ("," ~ pair)* ~ "}"
 }
-pair   = { string ~ ":" ~ value }
-
 array = {
-    "[" ~ "]"
-  | "[" ~ value ~ ("," ~ value)* ~ "]"
+    "[" ~ "]" |
+    "[" ~ value ~ ("," ~ value)* ~ "]"
 }
-
 string = ${ "\"" ~ inner ~ "\"" }
-inner  = @{ char* }
-char   =  {
-    !("\"" | "\\") ~ ANY
-  | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
-  | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
-}
-
+value = _{ object | array | string | number | boolean | null }
 number = @{
-    "-"? ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*) ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
+    "-"?
+    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
+    ~ ("." ~ ASCII_DIGIT*)?
+    ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
 }
-
 boolean = { "true" | "false" }
-
 null = { "null" }
-
-// JSON end
+inner = @{ char* }
+char = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+pair = { string ~ ":" ~ value }
 
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
 
