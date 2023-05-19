@@ -16,6 +16,8 @@ expr = {
     get_clip |
     get_index |
     get_range |
+    search |
+    search_when |
     delete |
     delete_when |
     delete_pointer |
@@ -37,7 +39,10 @@ get_pointer = { "get"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~collection
 get_view = { "get"~"."~"view"~"(" ~ view ~ ")"~"."~"from"~"("~collection~")" }
 get_clip = { "get"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
 get_index = { "get"~"."~"index"~"("~quots~")"~"."~"from"~"("~collection~")" }
-get_range = { "get"~"."~"range"~"("~"start"~":"~quots~","~"end"~":"~quots~")"~"."~"from"~"("~collection~")" }
+get_range = { "get"~"."~"range"~"("~"start"~":"~quots~","~"end"~":"~quots~","~"on"~":"~quots~")"~"."~"from"~"("~collection~")" }
+
+search = { "search"~"."~"query"~"("~quots~")"~"."~"from"~"("~collection~")" }
+search_when = { "search"~"."~"when"~"("~condition~")"~"."~"query"~"("~quots~")"~"."~"from"~"("~collection~")" }
 
 delete = { "delete"~"."~"from"~"(" ~ collection ~ ")" }
 delete_when = { "delete"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" }

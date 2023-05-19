@@ -92,13 +92,15 @@ use pest::iterators::{Pair};
 ///                     Flql::Put(_, _) => {}
 ///                     Flql::PutWhen(_, _, _) => {}
 ///                     Flql::PutPointer(_, _, _) => {}
+///                     Flql::Search(_,_) => {}
+///                     Flql::SearchWhen(_,_,_) => {}
 ///                     Flql::Get(_) => {}
 ///                     Flql::GetWhen(_, _) => {}
 ///                     Flql::GetPointer(_, _) => {}
 ///                     Flql::GetView(_, _) => {}
 ///                     Flql::GetClip(_, _) => {}
 ///                     Flql::GetIndex(_,_) => {}
-///                     Flql::GetRange(_,_,_) => {}
+///                     Flql::GetRange(_,_,_,_) => {}
 ///                     Flql::Delete(_) => {}
 ///                     Flql::DeleteWhen(_, _) => {}
 ///                     Flql::DeletePointer(_, _) => {}
@@ -122,13 +124,15 @@ pub enum Flql {
     Put(String,String),
     PutWhen(String, String, String),
     PutPointer(String, String, String),
+    Search(String, String),
+    SearchWhen(String, String, String),
     Get(String),
     GetWhen(String, String),
     GetPointer(String, String),
     GetView(String, String),
     GetClip(String, String),
     GetIndex(String, String),
-    GetRange(String, String, String),
+    GetRange(String, String, String, String),
     Delete(String),
     DeleteWhen(String, String),
     DeletePointer(String, String),
@@ -178,6 +182,21 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
                 three[2].to_string()
             )
         }
+        Rule::search => {
+            let two = two(pair);
+            Flql::Search(
+                two[0].to_string(),
+                two[1].to_string()
+            )
+        }
+        Rule::search_when => {
+            let three = three(pair);
+            Flql::SearchWhen(
+                three[0].to_string(),
+                three[1].to_string(),
+                three[2].to_string()
+            )
+        }
         Rule::get => {
             Flql::Get(one(pair).to_string())
         }
@@ -189,11 +208,12 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
             )
         }
         Rule::get_range => {
-            let three = three(pair);
+            let four = four(pair);
             Flql::GetRange(
-                three[0].to_string(),
-                three[1].to_string(),
-                three[2].to_string()
+                four[0].to_string(),
+                four[1].to_string(),
+                four[2].to_string(),
+                four[3].to_string(),
             )
         }
         Rule::get_when => {
@@ -272,6 +292,15 @@ fn three(opt:Pair<Rule>) -> [String; 3] {
     [index_id, doc, cond]
 }
 
+fn four(opt:Pair<Rule>) -> [String; 4] {
+    let mut pair = opt.into_inner();
+    let f = str(pair.next().unwrap());
+    let s = str(pair.next().unwrap());
+    let t = str(pair.next().unwrap());
+    let fr = str(pair.next().unwrap());
+    [f,s,t,fr]
+}
+
 fn str(opt: Pair<Rule>) -> String {
     opt.as_str().to_string()
 }
@@ -337,13 +366,15 @@ mod tests {
                     Flql::Put(_, _) => {}
                     Flql::PutWhen(_, _, _) => {}
                     Flql::PutPointer(_, _, _) => {}
+                    Flql::Search(_,_) => {}
+                    Flql::SearchWhen(_,_,_) => {}
                     Flql::Get(_) => {}
                     Flql::GetWhen(_, _) => {}
                     Flql::GetPointer(_, _) => {}
                     Flql::GetView(_, _) => {}
                     Flql::GetClip(_, _) => {}
                     Flql::GetIndex(_,_) => {}
-                    Flql::GetRange(_,_,_) => {}
+                    Flql::GetRange(_,_,_,_) => {}
                     Flql::Delete(_) => {}
                     Flql::DeleteWhen(_, _) => {}
                     Flql::DeletePointer(_, _) => {}
