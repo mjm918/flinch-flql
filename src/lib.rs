@@ -7,6 +7,7 @@ extern crate pest;
 
 use pest::Parser;
 use pest::iterators::{Pair};
+use crate::exp_parser::BoxedExpression;
 
 
 /// **Create collection** <br>
@@ -670,10 +671,13 @@ pub fn parse(dql: &str) -> Result<Flql, String> {
     }
 }
 
+pub fn expr_parse(expression: &str) -> anyhow::Result<BoxedExpression> {
+    exp_parser::Parser::parse(expression)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{Flql, parse};
-    use crate::exp_parser::Parser;
+    use crate::{Flql, parse, expr_parse};
 
     #[test]
     fn test() {
@@ -732,7 +736,7 @@ mod tests {
     #[test]
     fn parser() {
         let src = r#"{"string":"text", "object":{ "prop": true }, "array":[1,3], "array_map":[{"a":1},{"a":2}] }"#.as_bytes();
-        let expr = Parser::parse(".string EW \"xt\"").unwrap();
+        let expr = expr_parse(".string EW \"xt\"").unwrap();
         let result = expr.calculate(src);
         assert!(result.is_ok());
     }
