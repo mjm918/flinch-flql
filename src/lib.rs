@@ -1,5 +1,5 @@
-mod lexer;
-mod exp_parser;
+pub mod lexer;
+pub mod exp_parser;
 
 #[macro_use]
 extern crate pest_derive;
