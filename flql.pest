@@ -57,7 +57,7 @@ view = @{quots}
 clip = @{quots}
 document = @{object}
 condition = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
-ttl_period = @{ASCII_NONZERO_DIGIT}
+ttl_period = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*}
 
 quots = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
 object = {
