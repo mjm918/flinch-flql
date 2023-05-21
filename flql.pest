@@ -6,6 +6,7 @@ expr = {
     drop |
     exists |
     length |
+    ttl |
     put |
     put_when |
     put_pointer |
@@ -16,9 +17,7 @@ expr = {
     get_clip |
     get_index |
     get_range |
-    search |
     search_typing |
-    search_when |
     delete |
     delete_when |
     delete_pointer |
@@ -35,6 +34,8 @@ put = { "put"~"(" ~ document ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
 put_when = { "put"~"("~document~")"~"."~"when"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
 put_pointer = { "put"~"("~document~")"~"."~"pointer"~"("~pointer~")"~"."~"into"~"(" ~ collection ~ ")" }
 
+ttl = { "ttl"~"("~ttl_period~")"~"."~"if"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
+
 get = { "get"~"."~"from"~"("~ collection ~")" }
 get_when = { "get"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" }
 get_pointer = { "get"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~collection~")" }
@@ -43,9 +44,7 @@ get_clip = { "get"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
 get_index = { "get"~"."~"index"~"("~quots~")"~"."~"from"~"("~collection~")" }
 get_range = { "get"~"."~"range"~"("~"start"~":"~quots~","~"end"~":"~quots~","~"on"~":"~quots~")"~"."~"from"~"("~collection~")" }
 
-search = { "search"~"."~"query"~"("~quots~")"~"."~"from"~"("~collection~")" }
 search_typing = { "search"~"."~"typing"~"("~quots~")"~"."~"from"~"("~collection~")" }
-search_when = { "search"~"."~"when"~"("~condition~")"~"."~"query"~"("~quots~")"~"."~"from"~"("~collection~")" }
 
 delete = { "delete"~"."~"from"~"(" ~ collection ~ ")" }
 delete_when = { "delete"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" }
@@ -57,7 +56,8 @@ pointer = @{quots}
 view = @{quots}
 clip = @{quots}
 document = @{object}
-condition = @{ ":" ~ ( "::" | (!":" ~ ANY) )* ~ ":" }
+condition = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
+ttl_period = @{ASCII_NONZERO_DIGIT}
 
 quots = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
 object = {

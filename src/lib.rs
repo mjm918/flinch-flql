@@ -71,15 +71,15 @@ use crate::exp_parser::BoxedExpression;
 ///             "exists('').into('');",
 ///             "length('');",
 ///             "put({}).into('');",
-///             "put({}).when(:includes(array_filter('e.f$.g'),2):).into('');",
+///             "put({}).when('prop.name == \"acv\" OR prop.name SW \"ac\"').into('');",
 ///             "put({}).pointer('').into('');",
 ///             "get.from('');",
-///             "get.when(:includes(array_filter('e.f$.g'),2):).from('');",
+///             "get.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
 ///             "get.pointer('').from('');",
 ///             "get.view('').from('');",
 ///             "get.clip('').from('');",
 ///             "delete.from('');",
-///             "delete.when(:includes(array_filter('e.f$.g'),2):).from('');",
+///             "delete.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
 ///             "delete.pointer('').from('');",
 ///             "delete.clip('').from('');"
 ///         ];
@@ -94,12 +94,11 @@ use crate::exp_parser::BoxedExpression;
 ///                     Flql::Exists(_,_) => {}
 ///                     Flql::Length(_) => {}
 ///                     Flql::Flush(_) => {}
+///                     Flql::Ttl(_,_,_) => {}
 ///                     Flql::Put(_, _) => {}
 ///                     Flql::PutWhen(_, _, _) => {}
 ///                     Flql::PutPointer(_, _, _) => {}
-///                     Flql::Search(_,_) => {}
 ///                     Flql::SearchTyping(_,_) => {}
-///                     Flql::SearchWhen(_,_,_) => {}
 ///                     Flql::Get(_) => {}
 ///                     Flql::GetWhen(_, _) => {}
 ///                     Flql::GetPointer(_, _) => {}
@@ -452,12 +451,11 @@ pub enum Flql {
     Exists(String, String),
     Length(String),
     Flush(String),
+    Ttl(String, String, String),
     Put(String,String),
     PutWhen(String, String, String),
     PutPointer(String, String, String),
-    Search(String, String),
     SearchTyping(String, String),
-    SearchWhen(String, String, String),
     Get(String),
     GetWhen(String, String),
     GetPointer(String, String),
@@ -494,6 +492,14 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         Rule::flush => {
             Flql::Flush(one(pair).to_string())
         }
+        Rule::ttl => {
+            let three = three(pair);
+            Flql::Ttl(
+                three[0].to_string(),
+                three[1].to_string(),
+                three[2].to_string()
+            )
+        }
         Rule::put => {
             let two = two(pair);
             Flql::Put(
@@ -517,26 +523,11 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
                 three[2].to_string()
             )
         }
-        Rule::search => {
-            let two = two(pair);
-            Flql::Search(
-                two[0].to_string(),
-                two[1].to_string()
-            )
-        }
         Rule::search_typing => {
             let two = two(pair);
             Flql::SearchTyping(
                 two[0].to_string(),
                 two[1].to_string()
-            )
-        }
-        Rule::search_when => {
-            let three = three(pair);
-            Flql::SearchWhen(
-                three[0].to_string(),
-                three[1].to_string(),
-                three[2].to_string()
             )
         }
         Rule::get => {
@@ -687,15 +678,15 @@ mod tests {
             "exists('').into('');",
             "length('');",
             "put({}).into('');",
-            "put({}).when(:prop.name == \"acv\" OR prop.name SW \"ac\":).into('');",
+            "put({}).when('prop.name == \"acv\" OR prop.name SW \"ac\"').into('');",
             "put({}).pointer('').into('');",
             "get.from('');",
-            "get.when(:prop.name == \"acv\" OR prop.name SW \"ac\":).from('');",
+            "get.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
             "get.pointer('').from('');",
             "get.view('').from('');",
             "get.clip('').from('');",
             "delete.from('');",
-            "delete.when(:prop.name == \"acv\" OR prop.name SW \"ac\":).from('');",
+            "delete.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
             "delete.pointer('').from('');",
             "delete.clip('').from('');"
         ];
@@ -710,12 +701,11 @@ mod tests {
                     Flql::Exists(_,_) => {}
                     Flql::Length(_) => {}
                     Flql::Flush(_) => {}
+                    Flql::Ttl(_,_,_) => {}
                     Flql::Put(_, _) => {}
                     Flql::PutWhen(_, _, _) => {}
                     Flql::PutPointer(_, _, _) => {}
-                    Flql::Search(_,_) => {}
                     Flql::SearchTyping(_,_) => {}
-                    Flql::SearchWhen(_,_,_) => {}
                     Flql::Get(_) => {}
                     Flql::GetWhen(_, _) => {}
                     Flql::GetPointer(_, _) => {}

@@ -21,6 +21,9 @@ To use FLQL, you will need to have Flinch installed and running on your system. 
 //Create collection
 new({}); 
 
+// TTL
+ttl(60).if('').into('');
+
 //Drop collection
 drop(''); 
 
@@ -34,7 +37,7 @@ length('');
 put({}).into(''); 
 
 //Conditional Update or Insert into collection
-put({}).when(:gjson_expression:).into(''); 
+put({}).when('gjson_expression').into(''); 
 
 //Update or Insert into collection to a Pointer
 put({}).pointer('').into(''); 
@@ -43,7 +46,7 @@ put({}).pointer('').into('');
 get.from(''); 
 
 //Conditional Get from collection
-get.when(:gjson_expression:).from(''); 
+get.when('gjson_expression').from(''); 
 
 //Get Pointer from collection
 get.pointer('').from(''); 
@@ -58,7 +61,7 @@ get.clip('').from('');
 delete.from(''); 
 
 //Conditional Delete from collection
-delete.when(:gjson_expression:).from(''); 
+delete.when('gjson_expression').from(''); 
 
 //Delete Pointer from collection
 delete.pointer('').from(''); 
@@ -79,15 +82,15 @@ delete.clip('').from('');
              "exists('').into('');",
              "length('');",
              "put({}).into('');",
-             "put({}).when(:gjson_expression:).into('');",
+             "put({}).when('gjson_expression').into('');",
              "put({}).pointer('').into('');",
              "get.from('');",
-             "get.when(:gjson_expression:).from('');",
+             "get.when('gjson_expression').from('');",
              "get.pointer('').from('');",
              "get.view('').from('');",
              "get.clip('').from('');",
              "delete.from('');",
-             "delete.when(:gjson_expression:).from('');",
+             "delete.when('gjson_expression').from('');",
              "delete.pointer('').from('');",
              "delete.clip('').from('');"
          ];
@@ -106,8 +109,6 @@ delete.clip('').from('');
                      Flql::PutWhen(_, _, _) => {}
                      Flql::PutPointer(_, _, _) => {}
                      Flql::Search(_,_) => {}
-                     Flql::SearchTyping(_,_) => {}
-                     Flql::SearchWhen(_,_,_) => {}
                      Flql::Get(_) => {}
                      Flql::GetWhen(_, _) => {}
                      Flql::GetPointer(_, _) => {}
