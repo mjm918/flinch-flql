@@ -17,6 +17,7 @@ expr = {
     get_index |
     get_range |
     search |
+    search_typing |
     search_when |
     delete |
     delete_when |
@@ -28,6 +29,7 @@ new = { "new" ~ "(" ~ object ~ ")" }
 drop = { "drop" ~ "(" ~ collection ~ ")" }
 exists = { "exists" ~ "(" ~ pointer ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
 length = { "length"~"("~ collection ~ ")" }
+flush = { "flush"~"("~ collection ~ ")" }
 
 put = { "put"~"(" ~ document ~ ")"~"."~"into"~"(" ~ collection ~ ")" }
 put_when = { "put"~"("~document~")"~"."~"when"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
@@ -42,6 +44,7 @@ get_index = { "get"~"."~"index"~"("~quots~")"~"."~"from"~"("~collection~")" }
 get_range = { "get"~"."~"range"~"("~"start"~":"~quots~","~"end"~":"~quots~","~"on"~":"~quots~")"~"."~"from"~"("~collection~")" }
 
 search = { "search"~"."~"query"~"("~quots~")"~"."~"from"~"("~collection~")" }
+search_typing = { "search"~"."~"typing"~"("~quots~")"~"."~"from"~"("~collection~")" }
 search_when = { "search"~"."~"when"~"("~condition~")"~"."~"query"~"("~quots~")"~"."~"from"~"("~collection~")" }
 
 delete = { "delete"~"."~"from"~"(" ~ collection ~ ")" }

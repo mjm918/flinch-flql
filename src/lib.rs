@@ -89,10 +89,12 @@ use pest::iterators::{Pair};
 ///                     Flql::Drop(_) => {}
 ///                     Flql::Exists(_,_) => {}
 ///                     Flql::Length(_) => {}
+///                     Flql::Flush(_) => {}
 ///                     Flql::Put(_, _) => {}
 ///                     Flql::PutWhen(_, _, _) => {}
 ///                     Flql::PutPointer(_, _, _) => {}
 ///                     Flql::Search(_,_) => {}
+///                     Flql::SearchTyping(_,_) => {}
 ///                     Flql::SearchWhen(_,_,_) => {}
 ///                     Flql::Get(_) => {}
 ///                     Flql::GetWhen(_, _) => {}
@@ -121,10 +123,12 @@ pub enum Flql {
     Drop(String),
     Exists(String, String),
     Length(String),
+    Flush(String),
     Put(String,String),
     PutWhen(String, String, String),
     PutPointer(String, String, String),
     Search(String, String),
+    SearchTyping(String, String),
     SearchWhen(String, String, String),
     Get(String),
     GetWhen(String, String),
@@ -159,6 +163,9 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         Rule::length => {
             Flql::Length(one(pair).to_string())
         }
+        Rule::flush => {
+            Flql::Flush(one(pair).to_string())
+        }
         Rule::put => {
             let two = two(pair);
             Flql::Put(
@@ -185,6 +192,13 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         Rule::search => {
             let two = two(pair);
             Flql::Search(
+                two[0].to_string(),
+                two[1].to_string()
+            )
+        }
+        Rule::search_typing => {
+            let two = two(pair);
+            Flql::SearchTyping(
                 two[0].to_string(),
                 two[1].to_string()
             )
@@ -363,10 +377,12 @@ mod tests {
                     Flql::Drop(_) => {}
                     Flql::Exists(_,_) => {}
                     Flql::Length(_) => {}
+                    Flql::Flush(_) => {}
                     Flql::Put(_, _) => {}
                     Flql::PutWhen(_, _, _) => {}
                     Flql::PutPointer(_, _, _) => {}
                     Flql::Search(_,_) => {}
+                    Flql::SearchTyping(_,_) => {}
                     Flql::SearchWhen(_,_,_) => {}
                     Flql::Get(_) => {}
                     Flql::GetWhen(_, _) => {}
