@@ -1,6 +1,6 @@
 [package]
 name = "flql"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Mohammad Julfikar <julfikar@eztech.com.my>", "Mohammad Julfikar <md.julfikar.mahmud@gmail.com>"]
 categories = ["parser-implementations"]
@@ -15,5 +15,13 @@ repository = "https://github.com/mjm918/flinch-flql"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anydate = "0.3.0"
+anyhow = "1.0.69"
+chrono = { version = "0.4.23", features = ["serde"] }
+clap = { version = "4.1.4", features = ["derive"] }
+gjson = "0.8.1"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.92"
+thiserror = "1.0.38"
 pest = "2.5.7"
 pest_derive = "2.5.7"
