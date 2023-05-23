@@ -99,8 +99,8 @@ use crate::exp_parser::BoxedExpression;
 ///                     Flql::PutWhen(_, _, _) => {}
 ///                     Flql::PutPointer(_, _, _) => {}
 ///                     Flql::SearchTyping(_,_) => {}
-///                     Flql::Get(_) => {}
-///                     Flql::GetWhen(_, _) => {}
+///                     Flql::Get(_,_,_) => {}
+///                     Flql::GetWhen(_, _,_,_) => {}
 ///                     Flql::GetPointer(_, _) => {}
 ///                     Flql::GetView(_, _) => {}
 ///                     Flql::GetClip(_, _) => {}
@@ -456,8 +456,8 @@ pub enum Flql {
     PutWhen(String, String, String),
     PutPointer(String, String, String),
     SearchTyping(String, String),
-    Get(String),
-    GetWhen(String, String),
+    Get(String, Option<String>, Option<String>),
+    GetWhen(String, String, Option<String>, Option<String>),
     GetPointer(String, String),
     GetView(String, String),
     GetClip(String, String),
@@ -531,7 +531,13 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
             )
         }
         Rule::get => {
-            Flql::Get(one(pair).to_string())
+            let opts = four_opt(pair);
+            let f = opts.get(0).unwrap().to_owned();
+            let t = opts.get(1).unwrap_or(&format!("")).to_owned();
+            let t = if t.is_empty() { None } else { Some(t) };
+            let tr = opts.get(2).unwrap_or(&format!("")).to_owned();
+            let tr = if tr.is_empty() { None } else { Some(tr) };
+            Flql::Get(f,t,tr)
         }
         Rule::get_index => {
             let two = two(pair);
@@ -550,10 +556,21 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
             )
         }
         Rule::get_when => {
-            let two = two(pair);
+            let opts = four_opt(pair);
+            let f = opts.get(0).unwrap().to_owned();
+            let t = opts.get(1).unwrap().to_owned();
+
+            let tr = opts.get(2).unwrap_or(&format!("")).to_owned();
+            let tr = if tr.is_empty() { None } else { Some(tr) };
+
+            let fr = opts.get(3).unwrap_or(&format!("")).to_owned();
+            let fr = if fr.is_empty() { None } else { Some(fr) };
+
             Flql::GetWhen(
-                two[0].to_string(),
-                two[1].to_string()
+                f,
+                t,
+                tr,
+                fr
             )
         }
         Rule::get_pointer => {
@@ -608,6 +625,24 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
 fn one(opt: Pair<Rule>) -> String {
     let mut pair = opt.into_inner();
     str(pair.next().unwrap())
+}
+
+fn four_opt(opt: Pair<Rule>) -> Vec<String> {
+    let mut pair = opt.into_inner();
+    let mut v = vec![];
+    loop {
+        let f = match pair.next() {
+            Some(i) => {
+                str(i)
+            },
+            None => "".to_string()
+        };
+        v.push(f);
+        if v.len() == 4 {
+            break;
+        }
+    }
+    v
 }
 
 fn two(opt: Pair<Rule>) -> [String; 2] {
@@ -688,7 +723,8 @@ mod tests {
             "delete.from('');",
             "delete.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
             "delete.pointer('').from('');",
-            "delete.clip('').from('');"
+            "delete.clip('').from('');",
+            "get.when('a').from('b').sort ( 'hh','ASC' ).page(0,10);"
         ];
         for command in commands {
             let chk = parse(command);
@@ -706,8 +742,8 @@ mod tests {
                     Flql::PutWhen(_, _, _) => {}
                     Flql::PutPointer(_, _, _) => {}
                     Flql::SearchTyping(_,_) => {}
-                    Flql::Get(_) => {}
-                    Flql::GetWhen(_, _) => {}
+                    Flql::Get(_,_,_) => {}
+                    Flql::GetWhen(_,_,_,_)=>{}
                     Flql::GetPointer(_, _) => {}
                     Flql::GetView(_, _) => {}
                     Flql::GetClip(_, _) => {}
