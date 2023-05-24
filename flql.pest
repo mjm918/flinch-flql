@@ -36,8 +36,8 @@ put_pointer = { "put"~"("~document~")"~"."~"pointer"~"("~pointer~")"~"."~"into"~
 
 ttl = { "ttl"~"("~u64~")"~"."~"if"~"("~condition~")"~"."~"into"~"(" ~ collection ~ ")" }
 
-get = { "get"~"."~"from"~"("~ collection ~")" ~ ("."~"sort"~"(")? ~ sort? ~ (")")? ~ ("."~"page"~"(")? ~limit?~ (")")? }
-get_when = { "get"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" ~ ("."~"sort"~"(")? ~ sort? ~ (")")? ~ ("."~"page"~"(")? ~limit?~ (")")? }
+get = { "get"~"."~"from"~"("~ collection ~")" ~ ("."~"sort"~"(") ~ sort ~ (")") ~ ("."~"page"~"(") ~limit~ (")") }
+get_when = { "get"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collection~")" ~ ("."~"sort"~"(") ~ sort ~ (")") ~ ("."~"page"~"(") ~limit~ (")") }
 get_pointer = { "get"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~collection~")" }
 get_view = { "get"~"."~"view"~"(" ~ view ~ ")"~"."~"from"~"("~collection~")" }
 get_clip = { "get"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
@@ -58,8 +58,8 @@ clip = @{quots}
 document = @{object}
 condition = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
 u64 = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*}
-limit = @{(ASCII_DIGIT*)~","~(ASCII_DIGIT*)}
-sort = @{quots~","~("'ASC'" | "'DESC'")}
+limit = @{null | ((ASCII_DIGIT*)~","~(ASCII_DIGIT*))}
+sort = @{null | (quots~","~("'ASC'" | "'DESC'"))}
 
 quots = @{ "'" ~ ( "''" | (!"'" ~ ANY) )* ~ "'" }
 object = {

@@ -535,9 +535,9 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
             let opts = four_opt(pair);
             let f = opts.get(0).unwrap().to_owned();
             let t = opts.get(1).unwrap_or(&format!("")).to_owned();
-            let t = if t.is_empty() { None } else { Some(t) };
+            let t = if t.is_empty() || !t.contains(',') { None } else { Some(t) };
             let tr = opts.get(2).unwrap_or(&format!("")).to_owned();
-            let tr = if tr.is_empty() { None } else { Some(tr) };
+            let tr = if tr.is_empty() || !tr.contains(',') { None } else { Some(tr) };
             Flql::Get(f,t,tr)
         }
         Rule::get_index => {
@@ -562,10 +562,10 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
             let t = opts.get(1).unwrap().to_owned();
 
             let tr = opts.get(2).unwrap_or(&format!("")).to_owned();
-            let tr = if tr.is_empty() { None } else { Some(tr) };
+            let tr = if tr.is_empty() || !tr.contains(',') { None } else { Some(tr) };
 
             let fr = opts.get(3).unwrap_or(&format!("")).to_owned();
-            let fr = if fr.is_empty() { None } else { Some(fr) };
+            let fr = if fr.is_empty() || !fr.contains(',') { None } else { Some(fr) };
 
             Flql::GetWhen(
                 f,
@@ -717,8 +717,8 @@ mod tests {
             "put({}).into('');",
             "put({}).when('prop.name == \"acv\" OR prop.name SW \"ac\"').into('');",
             "put({}).pointer('').into('');",
-            "get.from('');",
-            "get.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
+            "get.from('').sort(null).page(0,10);",
+            "get.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('').sort(null).page(null);",
             "get.pointer('').from('');",
             "get.view('').from('');",
             "get.clip('').from('');",
@@ -744,7 +744,9 @@ mod tests {
                     Flql::PutWhen(_, _, _) => {}
                     Flql::PutPointer(_, _, _) => {}
                     Flql::SearchTyping(_,_) => {}
-                    Flql::Get(_,_,_) => {}
+                    Flql::Get(c,s,l) => {
+                        println!("{} {:?} {:?}",c,s,l);
+                    }
                     Flql::GetWhen(_,_,_,_)=>{}
                     Flql::GetPointer(_, _) => {}
                     Flql::GetView(_, _) => {}
@@ -771,7 +773,6 @@ mod tests {
         let src = r#"{"string":"TEST","date":"2023-01-01 12:00:01", "object":{ "prop": true }, "array":[1,3], "array_map":[{"a":1},{"a":2}] }"#;
         let set = r#"{string,date,array,array_map,"object":{"prop":false},"age":13,"new-arr":[{"z":1}]}"#;
         let result = get(src,set);
-        println!("{}",result.json());
 
         let src = r#"{
            "age":37,
@@ -786,7 +787,6 @@ mod tests {
         }"#;
         let set = r#"{name.first,age,"the_murphys":friends.#(last="Murphy")#.first}"#;
         let result = get(src,set);
-        println!("{}",result.json());
 
         let src = r#"{
            "age":37,
@@ -802,6 +802,5 @@ mod tests {
         let expr = expr_parse(".friends|$reverse").unwrap();
         let result = expr.calculate(src);
         assert!(result.is_ok());
-        println!("{:?}",result.unwrap());
     }
 }
