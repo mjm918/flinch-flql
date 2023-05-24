@@ -1,12 +1,13 @@
 use crate::lexer::{Token, TokenKind, Tokenizer};
 use anyhow::anyhow;
 use chrono::{DateTime, Utc};
-use gjson::Kind;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Peekable;
 use thiserror::Error;
+use crate::gjson::gjson;
+use crate::gjson::gjson::{get_bytes, Kind};
 
 /// Represents the calculated Expression result.
 #[derive(Debug, PartialEq, Clone, Serialize)]
@@ -744,7 +745,7 @@ struct SelectorPath {
 
 impl Expression for SelectorPath {
     fn calculate(&self, json: &[u8]) -> Result<Value> {
-        Ok(unsafe { gjson::get_bytes(json, &self.ident).into() })
+        Ok(unsafe { get_bytes(json, &self.ident).into() })
     }
 }
 

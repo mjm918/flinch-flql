@@ -214,9 +214,9 @@ fn tokenize_single_token(data: &[u8]) -> Result<(TokenKind, u16)> {
             }
         }
         b'I' => tokenize_keyword(data, "IN".as_bytes(), TokenKind::In)?,
-        b'S' => tokenize_keyword(data, "SW".as_bytes(), TokenKind::StartsWith)?,
-        b'E' => tokenize_keyword(data, "EW".as_bytes(), TokenKind::EndsWith)?,
-        b'B' => tokenize_keyword(data, "BTW".as_bytes(), TokenKind::Between)?,
+        b'S' => tokenize_keyword(data, "STARTS_WITH".as_bytes(), TokenKind::StartsWith)?,
+        b'E' => tokenize_keyword(data, "ENDS_WITH".as_bytes(), TokenKind::EndsWith)?,
+        b'B' => tokenize_keyword(data, "BETWEEN".as_bytes(), TokenKind::Between)?,
         b'N' => tokenize_null(data)?,
         b'_' => tokenize_identifier(data)?,
         b'0'..=b'9' => tokenize_number(data)?,

@@ -1,5 +1,6 @@
 pub mod lexer;
 pub mod exp_parser;
+pub mod gjson;
 
 #[macro_use]
 extern crate pest_derive;
@@ -704,6 +705,7 @@ pub fn expr_parse(expression: &str) -> anyhow::Result<BoxedExpression> {
 #[cfg(test)]
 mod tests {
     use crate::{Flql, parse, expr_parse};
+    use crate::gjson::gjson::get;
 
     #[test]
     fn test() {
@@ -761,9 +763,45 @@ mod tests {
 
     #[test]
     fn parser() {
-        let src = r#"{"string":"text", "object":{ "prop": true }, "array":[1,3], "array_map":[{"a":1},{"a":2}] }"#.as_bytes();
-        let expr = expr_parse(".string EW \"xt\"").unwrap();
+        let src = r#"{"string":"TEST","date":"2023-01-01 12:00:01", "object":{ "prop": true }, "array":[1,3], "array_map":[{"a":1},{"a":2}] }"#.as_bytes();
+        let expr = expr_parse(".string ENDS_WITH \"xt\"").unwrap();
         let result = expr.calculate(src);
         assert!(result.is_ok());
+
+        let src = r#"{"string":"TEST","date":"2023-01-01 12:00:01", "object":{ "prop": true }, "array":[1,3], "array_map":[{"a":1},{"a":2}] }"#;
+        let set = r#"{string,date,array,array_map,"object":{"prop":false},"age":13,"new-arr":[{"z":1}]}"#;
+        let result = get(src,set);
+        println!("{}",result.json());
+
+        let src = r#"{
+           "age":37,
+           "children": ["Sara","Alex","Jack"],
+           "fav.movie": "Deer Hunter",
+           "friends": [
+             {"age": 44, "first": "Dale", "last": "Murphy"},
+             {"age": 68, "first": "Roger", "last": "Craig"},
+             {"age": 47, "first": "Jane", "last": "Murphy"}
+           ],
+           "name": {"first": "Tom", "last": "Anderson"}
+        }"#;
+        let set = r#"{name.first,age,"the_murphys":friends.#(last="Murphy")#.first}"#;
+        let result = get(src,set);
+        println!("{}",result.json());
+
+        let src = r#"{
+           "age":37,
+           "children": ["Sara","Alex","Jack"],
+           "fav.movie": "Deer Hunter",
+           "friends": [
+             {"age": 44, "first": "Dale", "last": "Murphy"},
+             {"age": 68, "first": "Roger", "last": "Craig"},
+             {"age": 47, "first": "Jane", "last": "Murphy"}
+           ],
+           "name": {"first": "Tom", "last": "Anderson"}
+        }"#.as_bytes();
+        let expr = expr_parse(".friends|$reverse").unwrap();
+        let result = expr.calculate(src);
+        assert!(result.is_ok());
+        println!("{:?}",result.unwrap());
     }
 }
