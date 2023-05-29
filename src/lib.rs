@@ -90,6 +90,9 @@ use crate::exp_parser::BoxedExpression;
 ///             if chk.is_ok() {
 ///                 let parsed = chk.unwrap();
 ///                 match parsed {
+///                     Flql::DbNew(_,_) => {}
+///                     Flql::DbPerm(_,_) => {}
+///                     Flql::DbDrop(_) => {}
 ///                     Flql::New(_) => {}
 ///                     Flql::Drop(_) => {}
 ///                     Flql::Exists(_,_) => {}
@@ -447,6 +450,9 @@ struct FlqlParser;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Flql {
+    DbNew(String,String),
+    DbPerm(String,String),
+    DbDrop(String),
     New(String),
     Drop(String),
     Exists(String, String),
@@ -474,6 +480,23 @@ pub enum Flql {
 fn pair_parser(pair: Pair<Rule>) -> Flql {
     match pair.as_rule() {
         Rule::expr => pair_parser(pair.into_inner().next().unwrap()),
+        Rule::new_db => {
+            let two = two(pair);
+            Flql::DbNew(
+                two[0].to_string(),
+                two[1].to_string()
+            )
+        },
+        Rule::perm_db => {
+            let two = two(pair);
+            Flql::DbPerm(
+                two[0].to_string(),
+                two[1].to_string()
+            )
+        }
+        Rule::drop_db => {
+            Flql::DbDrop(one(pair).to_string())
+        }
         Rule::new => {
             Flql::New(one(pair).to_string())
         }
@@ -734,6 +757,9 @@ mod tests {
             if chk.is_ok() {
                 let parsed = chk.unwrap();
                 match parsed {
+                    Flql::DbNew(_,_) => {}
+                    Flql::DbPerm(_,_) => {}
+                    Flql::DbDrop(_) => {}
                     Flql::New(_) => {}
                     Flql::Drop(_) => {}
                     Flql::Exists(_,_) => {}
@@ -744,9 +770,7 @@ mod tests {
                     Flql::PutWhen(_, _, _) => {}
                     Flql::PutPointer(_, _, _) => {}
                     Flql::SearchTyping(_,_) => {}
-                    Flql::Get(c,s,l) => {
-                        println!("{} {:?} {:?}",c,s,l);
-                    }
+                    Flql::Get(_,_,_) => {}
                     Flql::GetWhen(_,_,_,_)=>{}
                     Flql::GetPointer(_, _) => {}
                     Flql::GetView(_, _) => {}

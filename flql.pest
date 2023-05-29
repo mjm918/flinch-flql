@@ -2,6 +2,9 @@ program = _{ SOI ~ ";"* ~ (stmt ~ ";"+) ~ stmt? ~ EOI }
 stmt = _{ expr }
 
 expr = {
+    new_db |
+    perm_db |
+    drop_db |
 	new |
     drop |
     exists |
@@ -23,6 +26,10 @@ expr = {
     delete_pointer |
     delete_clip
 }
+
+new_db = { "db"~"."~"new"~"("~db~")"~"."~"permit"~"("~object~")" }
+perm_db = { "db"~"("~db~")"~"."~"permit"~"("~object~")" }
+drop_db = { "db"~"("~db~")"~"."~"drop"~"("~")" }
 
 new = { "new" ~ "(" ~ object ~ ")" }
 drop = { "drop" ~ "(" ~ collection ~ ")" }
@@ -51,6 +58,7 @@ delete_when = { "delete"~"."~"when"~"(" ~ condition ~ ")"~"."~"from"~"("~collect
 delete_pointer = { "delete"~"."~"pointer"~"("~ pointer ~ ")"~"."~"from"~"("~collection~")" }
 delete_clip = { "delete"~"."~"clip"~"(" ~ clip ~ ")"~"."~"from"~"("~collection~")" }
 
+db = @{quots}
 collection = @{quots}
 pointer = @{quots}
 view = @{quots}

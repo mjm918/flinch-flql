@@ -45,7 +45,6 @@ pub enum TokenKind {
     Identifier,
 }
 
-/// A lexer for the KSQL expression syntax.
 pub struct Tokenizer<'a> {
     pos: u32,
     remaining: &'a [u8],
