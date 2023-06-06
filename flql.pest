@@ -5,6 +5,7 @@ expr = {
     new_db |
     perm_db |
     drop_db |
+    drop_user |
 	new |
     drop |
     exists |
@@ -30,6 +31,7 @@ expr = {
 new_db = { "db"~"."~"new"~"("~db~")"~"."~"permit"~"("~object~")" }
 perm_db = { "db"~"("~db~")"~"."~"permit"~"("~object~")" }
 drop_db = { "db"~"("~db~")"~"."~"drop"~"("~")" }
+drop_user = { "db"~"("~db~")"~"."~"user"~"("~quots~")"~"."~"drop"~"("~")" }
 
 new = { "new" ~ "(" ~ object ~ ")" }
 drop = { "drop" ~ "(" ~ collection ~ ")" }

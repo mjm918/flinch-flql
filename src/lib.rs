@@ -72,15 +72,15 @@ use crate::exp_parser::BoxedExpression;
 ///             "exists('').into('');",
 ///             "length('');",
 ///             "put({}).into('');",
-///             "put({}).when('prop.name == \"acv\" OR prop.name SW \"ac\"').into('');",
+///             "put({}).when('prop.name == \"acv\" OR prop.name STARTS_WITH \"ac\"').into('');",
 ///             "put({}).pointer('').into('');",
 ///             "get.from('');",
-///             "get.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
+///             "get.when('prop.name == \"acv\" OR prop.name STARTS_WITH \"ac\"').from('');",
 ///             "get.pointer('').from('');",
 ///             "get.view('').from('');",
 ///             "get.clip('').from('');",
 ///             "delete.from('');",
-///             "delete.when('prop.name == \"acv\" OR prop.name SW \"ac\"').from('');",
+///             "delete.when('prop.name == \"acv\" OR prop.name STARTS_WITH \"ac\"').from('');",
 ///             "delete.pointer('').from('');",
 ///             "delete.clip('').from('');"
 ///         ];
@@ -95,6 +95,7 @@ use crate::exp_parser::BoxedExpression;
 ///                     Flql::DbDrop(_) => {}
 ///                     Flql::New(_) => {}
 ///                     Flql::Drop(_) => {}
+///                     Flql::DropUser(_,_) => {}
 ///                     Flql::Exists(_,_) => {}
 ///                     Flql::Length(_) => {}
 ///                     Flql::Flush(_) => {}
@@ -455,6 +456,7 @@ pub enum Flql {
     DbDrop(String),
     New(String),
     Drop(String),
+    DropUser(String, String),
     Exists(String, String),
     Length(String),
     Flush(String),
@@ -496,6 +498,13 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
         }
         Rule::drop_db => {
             Flql::DbDrop(one(pair).to_string())
+        }
+        Rule::drop_user => {
+            let two = two(pair);
+            Flql::DropUser(
+                two[0].to_string(),
+                two[1].to_string()
+            )
         }
         Rule::new => {
             Flql::New(one(pair).to_string())
@@ -762,6 +771,7 @@ mod tests {
                     Flql::DbDrop(_) => {}
                     Flql::New(_) => {}
                     Flql::Drop(_) => {}
+                    Flql::DropUser(_,_) => {}
                     Flql::Exists(_,_) => {}
                     Flql::Length(_) => {}
                     Flql::Flush(_) => {}
