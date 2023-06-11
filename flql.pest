@@ -28,9 +28,9 @@ expr = {
     delete_clip
 }
 
-new_db = { "db"~"."~"new"~"("~db~")"~"."~"permit"~"("~object~")" }
-perm_db = { "db"~"("~db~")"~"."~"permit"~"("~object~")" }
-drop_db = { "db"~"("~db~")"~"."~"drop"~"("~")" }
+new_db = { "db"~"."~"new"~"("~object~")" }
+perm_db = { "db"~"."~"permit"~"("~object~")" }
+drop_db = { "db"~"."~"drop"~"("~db~")" }
 drop_user = { "db"~"("~db~")"~"."~"user"~"("~quots~")"~"."~"drop"~"("~")" }
 
 new = { "new" ~ "(" ~ object ~ ")" }

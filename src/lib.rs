@@ -90,8 +90,8 @@ use crate::exp_parser::BoxedExpression;
 ///             if chk.is_ok() {
 ///                 let parsed = chk.unwrap();
 ///                 match parsed {
-///                     Flql::DbNew(_,_) => {}
-///                     Flql::DbPerm(_,_) => {}
+///                     Flql::DbNew(_) => {}
+///                     Flql::DbPerm(_) => {}
 ///                     Flql::DbDrop(_) => {}
 ///                     Flql::New(_) => {}
 ///                     Flql::Drop(_) => {}
@@ -451,8 +451,8 @@ struct FlqlParser;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Flql {
-    DbNew(String,String),
-    DbPerm(String,String),
+    DbNew(String),
+    DbPerm(String),
     DbDrop(String),
     New(String),
     Drop(String),
@@ -483,18 +483,10 @@ fn pair_parser(pair: Pair<Rule>) -> Flql {
     match pair.as_rule() {
         Rule::expr => pair_parser(pair.into_inner().next().unwrap()),
         Rule::new_db => {
-            let two = two(pair);
-            Flql::DbNew(
-                two[0].to_string(),
-                two[1].to_string()
-            )
+            Flql::DbNew(one(pair).to_string())
         },
         Rule::perm_db => {
-            let two = two(pair);
-            Flql::DbPerm(
-                two[0].to_string(),
-                two[1].to_string()
-            )
+            Flql::DbPerm(one(pair).to_string())
         }
         Rule::drop_db => {
             Flql::DbDrop(one(pair).to_string())
@@ -766,8 +758,8 @@ mod tests {
             if chk.is_ok() {
                 let parsed = chk.unwrap();
                 match parsed {
-                    Flql::DbNew(_,_) => {}
-                    Flql::DbPerm(_,_) => {}
+                    Flql::DbNew(_) => {}
+                    Flql::DbPerm(_) => {}
                     Flql::DbDrop(_) => {}
                     Flql::New(_) => {}
                     Flql::Drop(_) => {}
