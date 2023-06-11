@@ -1,6 +1,6 @@
 use crate::lexer::{Token, TokenKind, Tokenizer};
 use anyhow::anyhow;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, SecondsFormat, Utc};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::{Debug, Display, Formatter};
@@ -235,6 +235,12 @@ impl<'a> Parser<'a> {
                                     } else {
                                         expression = Box::new(value);
                                     }
+                                }
+                                "_string_" => {
+                                    expression = Box::new(CoerceToString { value: expression });
+                                }
+                                "_number_" => {
+                                    expression = Box::new(CoerceToNumber { value: expression });
                                 }
                                 "_lowercase_" => {
                                     expression = Box::new(CoerceLowercase { value: expression });
@@ -690,6 +696,53 @@ struct CoercedConst {
 impl Expression for CoercedConst {
     fn calculate(&self, _json: &[u8]) -> Result<Value> {
         Ok(self.value.clone())
+    }
+}
+
+#[derive(Debug)]
+struct CoerceToNumber {
+    value: BoxedExpression,
+}
+
+impl Expression for CoerceToNumber {
+    #[allow(clippy::cast_precision_loss)]
+    fn calculate(&self, json: &[u8]) -> Result<Value> {
+        let value = self.value.calculate(json)?;
+        match value {
+            Value::String(s) => Ok(Value::Number(
+                s.parse::<f64>()
+                    .map_err(|e| Error::UnsupportedCOERCE(e.to_string()))?,
+            )),
+            Value::Number(num) => Ok(Value::Number(num)),
+            Value::Bool(b) => Ok(Value::Number(if b { 1.0 } else { 0.0 })),
+            Value::DateTime(dt) => Ok(Value::Number(dt.timestamp_nanos() as f64)),
+            _ => Err(Error::UnsupportedCOERCE(
+                format!("{value} COERCE datetime",),
+            )),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct CoerceToString {
+    value: BoxedExpression,
+}
+
+impl Expression for CoerceToString {
+    fn calculate(&self, json: &[u8]) -> Result<Value> {
+        let value = self.value.calculate(json)?;
+        match value {
+            Value::Null => Ok(Value::String("null".to_string())),
+            Value::String(s) => Ok(Value::String(s)),
+            Value::Number(num) => Ok(Value::String(num.to_string())),
+            Value::Bool(b) => Ok(Value::String(b.to_string())),
+            Value::DateTime(dt) => Ok(Value::String(
+                dt.to_rfc3339_opts(SecondsFormat::AutoSi, true),
+            )),
+            _ => Err(Error::UnsupportedCOERCE(
+                format!("{value} COERCE datetime",),
+            )),
+        }
     }
 }
 
